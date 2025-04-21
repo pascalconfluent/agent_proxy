@@ -1,10 +1,14 @@
 package io.confluent.pas.agent.proxy.rest;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import io.confluent.pas.agent.common.services.Schemas;
+import io.confluent.pas.agent.common.services.schemas.ResourceRegistration;
+import io.confluent.pas.agent.common.services.schemas.ResourceRequest;
+import io.confluent.pas.agent.common.services.schemas.ResourceResponse;
 import io.confluent.pas.agent.proxy.registration.RegistrationCoordinator;
 import io.confluent.pas.agent.proxy.registration.RegistrationHandler;
-import io.confluent.pas.agent.proxy.registration.handlers.ResourceHandler;
+import io.confluent.pas.agent.proxy.registration.handlers.mcp.ResourceHandler;
+import io.confluent.pas.agent.common.services.schemas.BlobResourceResponse;
+import io.confluent.pas.agent.common.services.schemas.TextResourceResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.ParameterizedTypeReference;
@@ -57,7 +61,7 @@ public class ToolRestController {
                 .filter(handler -> handler instanceof ResourceHandler)
                 .map(handler -> (ResourceHandler) handler)
                 .forEach(handler -> {
-                    final Schemas.ResourceRegistration registration = handler.getRegistration();
+                    final ResourceRegistration registration = handler.getRegistration();
                     final String urlPattern = registration.getUrl();
                     resourceHandlersByUrlPattern.put(urlPattern, handler);
                     log.debug("Registered resource handler for pattern: {}", urlPattern);
@@ -125,7 +129,7 @@ public class ToolRestController {
         // Get the appropriate handler for the resource request
         return findResourceHandler(urlParts)
                 .map(handler -> {
-                    final Schemas.ResourceRequest resourceRequest = new Schemas.ResourceRequest(
+                    final ResourceRequest resourceRequest = new ResourceRequest(
                             StringUtils.join(urlParts, "/"));
 
                     // Send the resource request to the handler
@@ -164,7 +168,7 @@ public class ToolRestController {
      * @param response the resource response
      * @return the server response Mono
      */
-    private Mono<ServerResponse> createResourceResponse(Schemas.ResourceResponse response) {
+    private Mono<ServerResponse> createResourceResponse(ResourceResponse response) {
         final MediaType mediaType = MediaType.parseMediaType(response.getMimeType());
         final String responseContent = extractResponseContent(response);
 
@@ -179,10 +183,10 @@ public class ToolRestController {
      * @param response the resource response
      * @return the response content as a string
      */
-    private String extractResponseContent(Schemas.ResourceResponse response) {
-        if (response instanceof Schemas.BlobResourceResponse blobResponse) {
+    private String extractResponseContent(ResourceResponse response) {
+        if (response instanceof BlobResourceResponse blobResponse) {
             return blobResponse.getBlob();
-        } else if (response instanceof Schemas.TextResourceResponse textResponse) {
+        } else if (response instanceof TextResourceResponse textResponse) {
             return textResponse.getText();
         } else {
             throw new IllegalArgumentException("Unsupported resource response type: " + response.getClass().getName());
@@ -208,11 +212,11 @@ public class ToolRestController {
      * @param urlParts the URL parts
      * @return an Optional containing the handler if found, empty otherwise
      */
-    private Optional<RegistrationHandler<Schemas.ResourceRequest, Schemas.ResourceResponse>> findResourceHandler(
+    private Optional<RegistrationHandler<ResourceRequest, ResourceResponse>> findResourceHandler(
             List<String> urlParts) {
         return resourceHandlersByUrlPattern.keySet().stream()
                 .filter(pattern -> isUrlPatternMatch(pattern, urlParts))
-                .map(pattern -> (RegistrationHandler<Schemas.ResourceRequest, Schemas.ResourceResponse>) resourceHandlersByUrlPattern
+                .map(pattern -> (RegistrationHandler<ResourceRequest, ResourceResponse>) resourceHandlersByUrlPattern
                         .get(pattern))
                 .findFirst();
     }

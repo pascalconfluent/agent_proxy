@@ -1,6 +1,6 @@
 package io.confluent.pas.agent.proxy.rest;
 
-import io.confluent.pas.agent.common.services.Schemas;
+import io.confluent.pas.agent.common.services.schemas.Registration;
 import io.confluent.pas.agent.proxy.registration.RegistrationCoordinator;
 import io.confluent.pas.agent.proxy.registration.RegistrationHandler;
 import lombok.extern.slf4j.Slf4j;
@@ -21,7 +21,7 @@ public class ControlAPIController {
     }
 
     @GetMapping("/control/registrations")
-    public List<Schemas.Registration> getRegistrations() {
+    public List<Registration> getRegistrations() {
         return coordinator
                 .getAllRegistrationHandlers()
                 .stream()
@@ -30,7 +30,7 @@ public class ControlAPIController {
     }
 
     @PostMapping("/control/registration")
-    public void register(Schemas.Registration registration) {
+    public void register(Registration registration) {
         if (coordinator.isRegistered(registration.getName())) {
             throw new ResponseStatusException(
                     HttpStatus.CONFLICT,
@@ -42,7 +42,7 @@ public class ControlAPIController {
     }
 
     @PatchMapping("/control/registration")
-    public void update(Schemas.Registration registration) {
+    public void update(Registration registration) {
         if (coordinator.isRegistered(registration.getName())) {
             coordinator.register(registration);
         } else {

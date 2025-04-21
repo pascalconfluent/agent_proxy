@@ -6,7 +6,8 @@ import io.confluent.kafka.serializers.json.KafkaJsonSchemaSerializer;
 import io.confluent.pas.agent.common.services.KafkaConfiguration;
 import io.confluent.pas.agent.common.services.KafkaPropertiesFactory;
 import io.confluent.pas.agent.common.services.RegistrationService;
-import io.confluent.pas.agent.common.services.Schemas;
+import io.confluent.pas.agent.common.services.schemas.Registration;
+import io.confluent.pas.agent.common.services.schemas.RegistrationKey;
 import io.confluent.pas.agent.proxy.frameworks.java.kafka.TopicManagement;
 import io.confluent.pas.agent.proxy.frameworks.java.kafka.impl.TopicManagementImpl;
 import io.confluent.pas.agent.proxy.frameworks.java.models.Key;
@@ -57,7 +58,7 @@ public class SubscriptionHandler<K extends Key, REQ, RES> implements Closeable {
     }
 
     private final KafkaConfiguration kafkaConfiguration;
-    private final RegistrationService<Schemas.RegistrationKey, Schemas.Registration> registrationService;
+    private final RegistrationService<RegistrationKey, Registration> registrationService;
     private final Class<K> keyClass;
     private final Class<REQ> requestClass;
     private final Class<RES> responseClass;
@@ -86,8 +87,8 @@ public class SubscriptionHandler<K extends Key, REQ, RES> implements Closeable {
                 responseClass,
                 new RegistrationService<>(
                         kafkaConfiguration,
-                        Schemas.RegistrationKey.class,
-                        Schemas.Registration.class),
+                        RegistrationKey.class,
+                        Registration.class),
                 () -> new TopicManagementImpl(kafkaConfiguration),
                 KafkaStreams::new
         );
@@ -106,7 +107,7 @@ public class SubscriptionHandler<K extends Key, REQ, RES> implements Closeable {
                                Class<K> keyClass,
                                Class<REQ> requestClass,
                                Class<RES> responseClass,
-                               RegistrationService<Schemas.RegistrationKey, Schemas.Registration> registrationService,
+                               RegistrationService<RegistrationKey, Registration> registrationService,
                                Supplier<TopicManagement> topicManagementSupplier,
                                KStreamsSupplier kafkaStreamsSupplier) {
         this.kafkaConfiguration = kafkaConfiguration;
@@ -128,7 +129,7 @@ public class SubscriptionHandler<K extends Key, REQ, RES> implements Closeable {
      * @param handler      Handler to process incoming requests
      * @throws SubscriptionException if subscription setup fails
      */
-    public void subscribeWith(Schemas.Registration registration,
+    public void subscribeWith(Registration registration,
                               RequestHandler<K, REQ, RES> handler) throws SubscriptionException {
         log.info("Subscribing for registration: {}", registration.getName());
 
@@ -141,7 +142,7 @@ public class SubscriptionHandler<K extends Key, REQ, RES> implements Closeable {
     }
 
     /**
-     * Subscribes to a registration using explicit JSON schemas.
+     * Subscribes to a registration using explicit JSON 
      *
      * @param registration   Registration containing topic and name information
      * @param requestSchema  Schema for request validation
@@ -149,7 +150,7 @@ public class SubscriptionHandler<K extends Key, REQ, RES> implements Closeable {
      * @param handler        Handler to process incoming requests
      * @throws SubscriptionException if subscription setup fails
      */
-    public void subscribeWith(Schemas.Registration registration,
+    public void subscribeWith(Registration registration,
                               JsonSchema requestSchema,
                               JsonSchema responseSchema,
                               RequestHandler<K, REQ, RES> handler) throws SubscriptionException {
@@ -209,7 +210,7 @@ public class SubscriptionHandler<K extends Key, REQ, RES> implements Closeable {
     /**
      * Creates topics using class types.
      */
-    private <T, U> void createTopics(Schemas.Registration registration,
+    private <T, U> void createTopics(Registration registration,
                                      Class<K> keyClass,
                                      Class<T> requestClass,
                                      Class<U> responseClass) throws Exception {
@@ -221,9 +222,9 @@ public class SubscriptionHandler<K extends Key, REQ, RES> implements Closeable {
     }
 
     /**
-     * Creates topics using explicit schemas.
+     * Creates topics using explicit 
      */
-    private void createTopicsWithSchemas(Schemas.Registration registration,
+    private void createTopicsWithSchemas(Registration registration,
                                          JsonSchema requestSchema,
                                          JsonSchema responseSchema) throws Exception {
         try (TopicManagement topicManagement = topicManagementSupplier.get()) {
@@ -236,7 +237,7 @@ public class SubscriptionHandler<K extends Key, REQ, RES> implements Closeable {
     /**
      * Registers capability and starts Kafka Streams processing.
      */
-    private void startSubscription(Schemas.Registration registration,
+    private void startSubscription(Registration registration,
                                    RequestHandler<K, REQ, RES> handler) {
         registerCapability(registration);
         setupAndStartKafkaStreams(registration, handler);
@@ -245,8 +246,8 @@ public class SubscriptionHandler<K extends Key, REQ, RES> implements Closeable {
     /**
      * Registers the capability in the registration service.
      */
-    private void registerCapability(Schemas.Registration registration) {
-        final Schemas.RegistrationKey registrationKey = new Schemas.RegistrationKey(registration.getName());
+    private void registerCapability(Registration registration) {
+        final RegistrationKey registrationKey = new RegistrationKey(registration.getName());
 
         if (!registrationService.isRegistered(registrationKey)) {
             log.info("Registering capability: {}", registration.getName());
@@ -259,7 +260,7 @@ public class SubscriptionHandler<K extends Key, REQ, RES> implements Closeable {
     /**
      * Sets up and starts the Kafka Streams topology.
      */
-    private void setupAndStartKafkaStreams(Schemas.Registration registration,
+    private void setupAndStartKafkaStreams(Registration registration,
                                            RequestHandler<K, REQ, RES> handler) {
         StreamsBuilder builder = new StreamsBuilder();
 

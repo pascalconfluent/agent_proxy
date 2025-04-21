@@ -2,8 +2,8 @@ package io.confluent.pas.agent.proxy.registration;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import io.confluent.pas.agent.common.services.KafkaConfiguration;
+import io.confluent.pas.agent.common.services.schemas.Registration;
 import io.confluent.pas.agent.proxy.registration.kafka.ProducerService;
-import io.confluent.pas.agent.common.services.Schemas;
 import io.confluent.pas.agent.proxy.registration.kafka.ConsumerService;
 import io.confluent.pas.agent.proxy.registration.schemas.RegistrationSchemas;
 import io.micrometer.observation.Observation;
@@ -18,6 +18,7 @@ import reactor.core.publisher.Sinks;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 
 /**
@@ -48,7 +49,7 @@ public class RequestResponseHandler implements DisposableBean {
         this.observationRegistry = observationRegistry;
     }
 
-    public void addRegistrations(Collection<Schemas.Registration> registrations) {
+    public void addRegistrations(Collection<Registration> registrations) {
         consumerService.addRegistrations(registrations);
     }
 
@@ -63,7 +64,7 @@ public class RequestResponseHandler implements DisposableBean {
      * @throws ExecutionException   if the request fails
      * @throws InterruptedException if the request is interrupted
      */
-    public Mono<JsonNode> sendRequestResponse(Schemas.Registration registration,
+    public Mono<JsonNode> sendRequestResponse(Registration registration,
                                               RegistrationSchemas schemas,
                                               String correlationId,
                                               Map<String, Object> request)
@@ -75,11 +76,11 @@ public class RequestResponseHandler implements DisposableBean {
                 .lowCardinalityKeyValue("correlationId", correlationId)
                 .highCardinalityKeyValue("name", registration.getName());
 
-        return observation.observe(() -> sendRequestResponse(
+        return Objects.requireNonNull(observation.observe(() -> sendRequestResponse(
                         registration,
                         correlationId,
                         schemas.getRequestKeySchema().envelope(key),
-                        schemas.getRequestSchema().envelope(request)))
+                        schemas.getRequestSchema().envelope(request))))
                 .doOnError(observation::error)
                 .doFinally(signalType -> observation.stop());
     }
@@ -93,7 +94,7 @@ public class RequestResponseHandler implements DisposableBean {
      * @param request       the request
      * @return the response
      */
-    public Mono<JsonNode> sendRequestResponse(Schemas.Registration registration,
+    public Mono<JsonNode> sendRequestResponse(Registration registration,
                                               String correlationId,
                                               JsonNode key,
                                               JsonNode request) {

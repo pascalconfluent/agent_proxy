@@ -1,6 +1,7 @@
 package io.confluent.pas.agent.proxy.rest;
 
-import io.confluent.pas.agent.common.services.Schemas;
+import io.confluent.pas.agent.common.services.schemas.Registration;
+import io.confluent.pas.agent.common.services.schemas.ResourceRegistration;
 import io.confluent.pas.agent.proxy.registration.RegistrationCoordinator;
 import io.confluent.pas.agent.proxy.registration.RegistrationHandler;
 import org.springframework.context.annotation.Bean;
@@ -35,8 +36,8 @@ public class ToolRestConfiguration {
         final List<RegistrationHandler<?, ?>> registrationHandlers = registrationCoordinator.getAllRegistrationHandlers();
         registrationHandlers.stream()
                 .map(RegistrationHandler::getRegistration)
-                .filter(Schemas.Registration::isResource)
-                .map(r -> (Schemas.ResourceRegistration) r)
+                .filter(Registration::isResource)
+                .map(r -> (ResourceRegistration) r)
                 .forEach(registration -> {
                     final String url = registration.getUrl();
                     route.GET("/rcs/" + url, accept(APPLICATION_JSON), toolRestController::processResourceRequest);

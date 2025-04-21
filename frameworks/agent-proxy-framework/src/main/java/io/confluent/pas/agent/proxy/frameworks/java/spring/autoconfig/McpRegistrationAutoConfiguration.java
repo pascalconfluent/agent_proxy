@@ -1,6 +1,5 @@
 package io.confluent.pas.agent.proxy.frameworks.java.spring.autoconfig;
 
-import io.confluent.pas.agent.common.services.Schemas;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -8,6 +7,9 @@ import org.springframework.boot.autoconfigure.AutoConfigureOrder;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
+
+import io.confluent.pas.agent.common.services.schemas.Registration;
+import static io.confluent.pas.agent.common.services.schemas.Registration.CORRELATION_ID_FIELD_NAME;
 
 /**
  * Auto-configuration class for MCP (Model Control Protocol) agent registration.
@@ -47,7 +49,7 @@ public class McpRegistrationAutoConfiguration {
     /**
      * Field name for request-response correlation, defaults to standard name
      */
-    @Value("${agent.correlation-id:" + Schemas.Registration.CORRELATION_ID_FIELD_NAME + "}")
+    @Value("${agent.correlation-id:" + CORRELATION_ID_FIELD_NAME + "}")
     private String correlationIdFieldName;
 
     /**
@@ -58,8 +60,8 @@ public class McpRegistrationAutoConfiguration {
      */
     @Bean
     @ConditionalOnMissingBean
-    public Schemas.Registration getRegistration() {
-        return Schemas.Registration.builder()
+    public Registration getRegistration() {
+        return Registration.builder()
                 .name(name)
                 .description(agentDescription)
                 .requestTopicName(requestTopic)

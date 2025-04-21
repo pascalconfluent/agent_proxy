@@ -1,5 +1,7 @@
 package io.confluent.pas.agent.common.services;
 
+import io.confluent.pas.agent.common.services.schemas.Registration;
+import io.confluent.pas.agent.common.services.schemas.RegistrationKey;
 import io.kcache.KafkaCache;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,12 +20,12 @@ public class RegistrationServiceTest {
     private KafkaConfiguration kafkaConfiguration;
 
     @Mock
-    private RegistrationServiceHandler.Handler<Schemas.RegistrationKey, Schemas.Registration> handler;
+    private RegistrationServiceHandler.Handler<RegistrationKey, Registration> handler;
 
     @Mock
-    private KafkaCache<Schemas.RegistrationKey, Schemas.Registration> registrationCache;
+    private KafkaCache<RegistrationKey, Registration> registrationCache;
 
-    private RegistrationService<Schemas.RegistrationKey, Schemas.Registration> registrationService;
+    private RegistrationService<RegistrationKey, Registration> registrationService;
 
     @BeforeEach
     public void setUp() {
@@ -34,18 +36,18 @@ public class RegistrationServiceTest {
 
     @Test
     public void testGetAllRegistrations() {
-        List<Schemas.Registration> registrations = List.of(new Schemas.Registration());
+        List<Registration> registrations = List.of(new Registration());
         when(registrationCache.values()).thenReturn(registrations);
 
-        List<Schemas.Registration> result = registrationService.getAllRegistrations();
+        List<Registration> result = registrationService.getAllRegistrations();
 
         assertEquals(registrations, result);
     }
 
     @Test
     public void testIsRegistered() {
-        Schemas.RegistrationKey key = new Schemas.RegistrationKey();
-        when(registrationCache.get(key)).thenReturn(new Schemas.Registration());
+        RegistrationKey key = new RegistrationKey();
+        when(registrationCache.get(key)).thenReturn(new Registration());
 
         boolean result = registrationService.isRegistered(key);
 
@@ -54,8 +56,8 @@ public class RegistrationServiceTest {
 
     @Test
     public void testRegister() {
-        Schemas.RegistrationKey key = new Schemas.RegistrationKey();
-        Schemas.Registration registration = new Schemas.Registration();
+        RegistrationKey key = new RegistrationKey();
+        Registration registration = new Registration();
 
         registrationService.register(key, registration);
 
@@ -64,7 +66,7 @@ public class RegistrationServiceTest {
 
     @Test
     public void testUnregister() {
-        Schemas.RegistrationKey key = new Schemas.RegistrationKey();
+        RegistrationKey key = new RegistrationKey();
 
         registrationService.unregister(key);
 

@@ -1,13 +1,17 @@
-package io.confluent.pas.agent.proxy.registration.handlers;
+package io.confluent.pas.agent.proxy.registration.handlers.mcp;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import io.confluent.kafka.schemaregistry.client.SchemaRegistryClient;
 import io.confluent.kafka.schemaregistry.client.rest.exceptions.RestClientException;
-import io.confluent.pas.agent.common.services.Schemas;
+import io.confluent.pas.agent.common.services.schemas.ResourceRegistration;
+import io.confluent.pas.agent.common.services.schemas.ResourceRequest;
+import io.confluent.pas.agent.common.services.schemas.ResourceResponse;
 import io.confluent.pas.agent.common.utils.JsonUtils;
 import io.confluent.pas.agent.proxy.registration.RegistrationHandler;
 import io.confluent.pas.agent.proxy.registration.RequestResponseHandler;
 import io.confluent.pas.agent.proxy.registration.schemas.RegistrationSchemas;
+import io.confluent.pas.mcp.common.schemas.BlobResourceResponse;
+import io.confluent.pas.mcp.common.schemas.TextResourceResponse;
 import io.modelcontextprotocol.server.McpAsyncServer;
 import io.modelcontextprotocol.server.McpServerFeatures;
 import io.modelcontextprotocol.spec.McpSchema;
@@ -26,15 +30,15 @@ import java.util.concurrent.ExecutionException;
 
 @Slf4j
 @AllArgsConstructor
-public class ResourceHandler implements RegistrationHandler<Schemas.ResourceRequest, Schemas.ResourceResponse> {
+public class ResourceHandler implements RegistrationHandler<ResourceRequest, ResourceResponse> {
     @Getter
-    private final Schemas.ResourceRegistration registration;
+    private final ResourceRegistration registration;
     @Getter
     private final RegistrationSchemas schemas;
 
     private final RequestResponseHandler requestResponseHandler;
 
-    public ResourceHandler(Schemas.ResourceRegistration registration,
+    public ResourceHandler(ResourceRegistration registration,
                            SchemaRegistryClient schemaRegistryClient,
                            RequestResponseHandler requestResponseHandler) throws RestClientException, IOException {
         this.requestResponseHandler = requestResponseHandler;
@@ -115,11 +119,11 @@ public class ResourceHandler implements RegistrationHandler<Schemas.ResourceRequ
     }
 
     @Override
-    public Mono<Schemas.ResourceResponse> sendRequest(Schemas.ResourceRequest request) {
+    public Mono<ResourceResponse> sendRequest(ResourceRequest request) {
         final Map<String, Object> arguments = JsonUtils.toMap(request);
 
         return sendRequest(arguments)
-                .map(response -> JsonUtils.toObject(response, Schemas.ResourceResponse.class));
+                .map(response -> JsonUtils.toObject(response, ResourceResponse.class));
     }
 
     /**
@@ -149,21 +153,21 @@ public class ResourceHandler implements RegistrationHandler<Schemas.ResourceRequ
      * @param request the read resource request
      * @param sink    the sink to send the response to
      */
-    protected void sendRequest(McpSchema.ReadResourceRequest request, MonoSink<McpSchema.ReadResourceResult> sink) {
+    public void sendRequest(McpSchema.ReadResourceRequest request, MonoSink<McpSchema.ReadResourceResult> sink) {
         final Map<String, Object> arguments = JsonUtils.toMap(request);
 
         sendRequest(arguments).subscribe(response -> {
-            final Schemas.ResourceResponse.ResponseType responseType = Schemas.ResourceResponse.ResponseType.fromValue(response.get("type").asText());
+            final ResourceResponse.ResponseType responseType = ResourceResponse.ResponseType.fromValue(response.get("type").asText());
 
             final McpSchema.ResourceContents content;
-            if (responseType == Schemas.ResourceResponse.ResponseType.BLOB) {
-                Schemas.BlobResourceResponse resource = JsonUtils.toObject(response, Schemas.BlobResourceResponse.class);
+            if (responseType == ResourceResponse.ResponseType.BLOB) {
+                BlobResourceResponse resource = JsonUtils.toObject(response, BlobResourceResponse.class);
                 content = new McpSchema.BlobResourceContents(
                         resource.getUri(),
                         resource.getMimeType(),
                         resource.getBlob());
             } else {
-                Schemas.TextResourceResponse resource = JsonUtils.toObject(response, Schemas.TextResourceResponse.class);
+                TextResourceResponse resource = JsonUtils.toObject(response, TextResourceResponse.class);
                 content = new McpSchema.TextResourceContents(
                         resource.getUri(),
                         resource.getMimeType(),

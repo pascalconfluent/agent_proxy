@@ -2,7 +2,7 @@ package io.confluent.pas.agent.proxy.registration.kafka;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.confluent.pas.agent.common.services.Schemas;
+import io.confluent.pas.agent.common.services.schemas.Registration;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -31,7 +31,7 @@ class ConsumerServiceTest {
 
     @Test
     void testAddRegistrations() {
-        Schemas.Registration registration = new Schemas.Registration("testTool", "testDescription", "requestTopic", "responseTopic");
+        Registration registration = new Registration("testTool", "testDescription", "requestTopic", "responseTopic");
         consumerService.addRegistrations(Collections.singletonList(registration));
 
         verify(consumer).subscribe(Collections.singletonList("responseTopic"));
@@ -39,7 +39,7 @@ class ConsumerServiceTest {
 
     @Test
     void testRegisterResponseHandler() {
-        Schemas.Registration registration = new Schemas.Registration("testTool", "testDescription", "requestTopic", "responseTopic");
+        Registration registration = new Registration("testTool", "testDescription", "requestTopic", "responseTopic");
         ConsumerService.ResponseHandler handler = mock(ConsumerService.ResponseHandler.class);
         ConsumerService.ErrorHandler errorHandler = mock(ConsumerService.ErrorHandler.class);
 
@@ -56,7 +56,7 @@ class ConsumerServiceTest {
 
     @Test
     void testHandleResponse() throws IOException {
-        Schemas.Registration registration = new Schemas.Registration("testTool", "testDescription", "requestTopic", "responseTopic");
+        Registration registration = new Registration("testTool", "testDescription", "requestTopic", "responseTopic");
         ConsumerService.ResponseHandler handler = mock(ConsumerService.ResponseHandler.class);
         ConsumerService.ErrorHandler errorHandler = mock(ConsumerService.ErrorHandler.class);
 

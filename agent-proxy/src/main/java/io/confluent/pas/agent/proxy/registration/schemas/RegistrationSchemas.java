@@ -2,7 +2,7 @@ package io.confluent.pas.agent.proxy.registration.schemas;
 
 import io.confluent.kafka.schemaregistry.client.SchemaRegistryClient;
 import io.confluent.kafka.schemaregistry.client.rest.exceptions.RestClientException;
-import io.confluent.pas.agent.common.services.Schemas;
+import io.confluent.pas.agent.common.services.schemas.Registration;
 import io.confluent.pas.agent.common.utils.Lazy;
 import lombok.extern.slf4j.Slf4j;
 
@@ -33,7 +33,7 @@ public class RegistrationSchemas {
     }
 
     public RegistrationSchemas(SchemaRegistryClient client,
-                               Schemas.Registration registration) throws IOException, RestClientException {
+                               Registration registration) throws IOException, RestClientException {
         this.requestKeySchema = new Lazy<>(() -> {
             try {
                 return getSchema(registration.getRequestTopicName(), true, client);

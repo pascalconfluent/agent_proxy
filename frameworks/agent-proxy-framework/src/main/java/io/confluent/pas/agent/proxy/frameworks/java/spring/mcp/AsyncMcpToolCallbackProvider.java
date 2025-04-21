@@ -1,6 +1,6 @@
 package io.confluent.pas.agent.proxy.frameworks.java.spring.mcp;
 
-import io.confluent.pas.agent.common.services.Schemas;
+import io.confluent.pas.agent.common.services.schemas.Registration;
 import io.modelcontextprotocol.client.McpAsyncClient;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -30,7 +30,7 @@ public class AsyncMcpToolCallbackProvider extends McpToolFilters<AsyncMcpToolCal
      * @param registration Tool registration information
      * @param clients      List of asynchronous MCP clients
      */
-    public AsyncMcpToolCallbackProvider(Schemas.Registration registration, List<McpAsyncClient> clients) {
+    public AsyncMcpToolCallbackProvider(Registration registration, List<McpAsyncClient> clients) {
         super(registration);
         this.clients = clients;
     }
@@ -41,7 +41,7 @@ public class AsyncMcpToolCallbackProvider extends McpToolFilters<AsyncMcpToolCal
      * @param registration Tool registration information
      * @param clients      Variable number of asynchronous MCP clients
      */
-    public AsyncMcpToolCallbackProvider(Schemas.Registration registration, McpAsyncClient... clients) {
+    public AsyncMcpToolCallbackProvider(Registration registration, McpAsyncClient... clients) {
         super(registration);
         this.clients = List.of(clients);
     }

@@ -1,6 +1,7 @@
 package io.confluent.pas.mcp.exemple;
 
-import io.confluent.pas.agent.common.services.Schemas;
+import io.confluent.pas.agent.common.services.schemas.ResourceRequest;
+import io.confluent.pas.agent.common.services.schemas.TextResourceResponse;
 import io.confluent.pas.agent.common.utils.UriTemplate;
 import io.confluent.pas.agent.proxy.frameworks.java.Request;
 import io.confluent.pas.agent.proxy.frameworks.java.models.Key;
@@ -40,16 +41,16 @@ public class ResourceAgent {
             response_topic = "resource-response",
             contentType = MIME_TYPE,
             path = URI,
-            responseClass = Schemas.TextResourceResponse.class
+            responseClass = TextResourceResponse.class
     )
-    public void onRequest(Request<Key, Schemas.ResourceRequest, Schemas.TextResourceResponse> request) {
+    public void onRequest(Request<Key, ResourceRequest, TextResourceResponse> request) {
         log.info("Received request: {}", request.getRequest().getUri());
 
         // Extract values from the URI using the template
         final Map<String, Object> values = this.template.match(request.getRequest().getUri());
 
         // Respond to the request with a message containing the client_id
-        request.respond(new Schemas.TextResourceResponse(
+        request.respond(new TextResourceResponse(
                         request.getRequest().getUri(),
                         MIME_TYPE,
                         "{ \"message\": \"Hello, " + values.get("client_id") + "!\" }"

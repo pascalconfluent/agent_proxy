@@ -1,10 +1,10 @@
-package io.confluent.pas.agent.proxy.registration.handlers;
+package io.confluent.pas.agent.proxy.registration.handlers.mcp;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import io.confluent.kafka.schemaregistry.client.SchemaRegistryClient;
 import io.confluent.kafka.schemaregistry.client.rest.exceptions.RestClientException;
-import io.confluent.pas.agent.common.services.Schemas;
+import io.confluent.pas.agent.common.services.schemas.Registration;
 import io.confluent.pas.agent.common.utils.JsonUtils;
 import io.confluent.pas.agent.proxy.registration.RegistrationHandler;
 import io.confluent.pas.agent.proxy.registration.RequestResponseHandler;
@@ -31,12 +31,12 @@ import java.util.concurrent.ExecutionException;
 @AllArgsConstructor
 public class ToolHandler implements RegistrationHandler<Map<String, Object>, JsonNode> {
     @Getter
-    private final Schemas.Registration registration;
+    private final Registration registration;
     @Getter
     private final RegistrationSchemas schemas;
     private final RequestResponseHandler requestResponseHandler;
 
-    public ToolHandler(Schemas.Registration registration,
+    public ToolHandler(Registration registration,
                        SchemaRegistryClient schemaRegistryClient,
                        RequestResponseHandler requestResponseHandler) throws RestClientException, IOException {
         this.requestResponseHandler = requestResponseHandler;
@@ -101,7 +101,7 @@ public class ToolHandler implements RegistrationHandler<Map<String, Object>, Jso
      * @param arguments the arguments to send
      * @param sink      the sink to send the response to
      */
-    protected void sendToolRequest(Map<String, Object> arguments, MonoSink<McpSchema.CallToolResult> sink) {
+    public void sendToolRequest(Map<String, Object> arguments, MonoSink<McpSchema.CallToolResult> sink) {
         sendRequest(arguments).subscribe(response -> {
             // Serialize the response
             try {

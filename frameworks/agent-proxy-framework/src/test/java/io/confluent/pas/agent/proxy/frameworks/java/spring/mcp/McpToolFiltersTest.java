@@ -1,6 +1,6 @@
 package io.confluent.pas.agent.proxy.frameworks.java.spring.mcp;
 
-import io.confluent.pas.agent.common.services.Schemas;
+import io.confluent.pas.agent.common.services.schemas.Registration;
 import io.modelcontextprotocol.spec.McpSchema;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -15,7 +15,7 @@ public class McpToolFiltersTest {
 
     @BeforeEach
     public void setUp() {
-        Schemas.Registration registration = new Schemas.Registration("testTool", "description", "requestTopic", "responseTopic");
+        Registration registration = new Registration("testTool", "description", "requestTopic", "responseTopic");
         mcpToolFilters = new McpToolFilters<>(registration);
     }
 

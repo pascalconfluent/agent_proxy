@@ -1,7 +1,9 @@
 package io.confluent.pas.agent.proxy.frameworks.java.spring.annotation;
 
 import io.confluent.pas.agent.common.services.KafkaConfiguration;
-import io.confluent.pas.agent.common.services.Schemas;
+import io.confluent.pas.agent.common.services.schemas.Registration;
+import io.confluent.pas.agent.common.services.schemas.ResourceRegistration;
+import io.confluent.pas.agent.common.services.schemas.ResourceRequest;
 import io.confluent.pas.agent.proxy.frameworks.java.SubscriptionHandler;
 import io.confluent.pas.agent.proxy.frameworks.java.models.Key;
 import lombok.Builder;
@@ -57,7 +59,7 @@ public class AgentRegistrar implements InitializingBean, Closeable {
          * @param registration The registration information for the subscription.
          * @return The current InvocationHandler instance.
          */
-        public InvocationHandler subscribe(Schemas.Registration registration) {
+        public InvocationHandler subscribe(Registration registration) {
             subscriptionHandler.subscribeWith(
                     registration,
                     (request) -> {
@@ -178,7 +180,7 @@ public class AgentRegistrar implements InitializingBean, Closeable {
         log.info("Found resource {} on method {}", resource.name(), method.getName());
 
         // Create registration info for the resource
-        final Schemas.ResourceRegistration registration = new Schemas.ResourceRegistration(
+        final ResourceRegistration registration = new ResourceRegistration(
                 resource.name(),
                 resource.description(),
                 resource.request_topic(),
@@ -189,7 +191,7 @@ public class AgentRegistrar implements InitializingBean, Closeable {
         // Create and start a subscription handler for the resource
         var subscriptionHandler = subscriptionHandlerSupplier.get(
                 resource.keyClass(),
-                Schemas.ResourceRequest.class,
+                ResourceRequest.class,
                 resource.responseClass());
 
         return getInvocationHandler(method, bean, registration, subscriptionHandler);
@@ -208,7 +210,7 @@ public class AgentRegistrar implements InitializingBean, Closeable {
         log.info("Found agent {} on method {}", agent.name(), method.getName());
 
         // Create registration info for the agent
-        final Schemas.Registration registration = new Schemas.Registration(
+        final Registration registration = new Registration(
                 agent.name(),
                 agent.description(),
                 agent.request_topic(),
@@ -233,7 +235,7 @@ public class AgentRegistrar implements InitializingBean, Closeable {
      * @return Invocation handler for the method
      */
     @NotNull
-    private InvocationHandler getInvocationHandler(Method method, Object bean, Schemas.Registration registration, SubscriptionHandler<?, ?, ?> subscriptionHandler) {
+    private InvocationHandler getInvocationHandler(Method method, Object bean, Registration registration, SubscriptionHandler<?, ?, ?> subscriptionHandler) {
         try {
             // Create a MethodHandle for the method to allow dynamic invocation
             MethodHandles.Lookup lookup = MethodHandles.lookup();
