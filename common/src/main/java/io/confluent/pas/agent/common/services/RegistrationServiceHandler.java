@@ -1,5 +1,7 @@
 package io.confluent.pas.agent.common.services;
 
+import io.confluent.pas.agent.common.services.schemas.Registration;
+import io.confluent.pas.agent.common.services.schemas.RegistrationKey;
 import io.kcache.CacheUpdateHandler;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -17,7 +19,7 @@ import java.util.Map;
  * @param <R> the type of registration
  */
 @Slf4j
-public class RegistrationServiceHandler<K extends Schemas.RegistrationKey, R extends Schemas.Registration> implements CacheUpdateHandler<K, R> {
+public class RegistrationServiceHandler<K extends RegistrationKey, R extends Registration> implements CacheUpdateHandler<K, R> {
 
     /**
      * Interface for handling registration updates.
@@ -25,7 +27,7 @@ public class RegistrationServiceHandler<K extends Schemas.RegistrationKey, R ext
      * @param <K> the type of registration key
      * @param <R> the type of registration
      */
-    public interface Handler<K extends Schemas.RegistrationKey, R extends Schemas.Registration> {
+    public interface Handler<K extends RegistrationKey, R extends Registration> {
         void handleRegistrations(Map<K, R> registrations);
     }
 
@@ -58,7 +60,7 @@ public class RegistrationServiceHandler<K extends Schemas.RegistrationKey, R ext
 
         if (count == 0) {
             // No event, we might need to register the schemas
-            log.info("No registration found in the cache, registering schemas.");
+            log.info("No registration found in the cache, registering ");
             empty = true;
         } else if (!accumulator.isEmpty()) {
             handler.handleRegistrations(accumulator);

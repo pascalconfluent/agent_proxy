@@ -4,8 +4,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 import io.confluent.kafka.schemaregistry.client.SchemaMetadata;
 import io.confluent.kafka.schemaregistry.client.SchemaRegistryClient;
 import io.confluent.kafka.schemaregistry.client.rest.exceptions.RestClientException;
-import io.confluent.pas.agent.common.services.Schemas;
+import io.confluent.pas.agent.common.services.schemas.Registration;
 import io.confluent.pas.agent.proxy.registration.RequestResponseHandler;
+import io.confluent.pas.agent.proxy.registration.handlers.mcp.ToolHandler;
 import io.modelcontextprotocol.server.McpAsyncServer;
 import io.modelcontextprotocol.server.McpServerFeatures;
 import io.modelcontextprotocol.spec.McpSchema;
@@ -26,7 +27,7 @@ import static org.mockito.Mockito.*;
 class ToolHandlerTest {
 
     @Mock
-    private Schemas.Registration registration;
+    private Registration registration;
 
     @Mock
     private SchemaRegistryClient schemaRegistryClient;

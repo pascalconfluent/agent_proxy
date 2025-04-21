@@ -5,7 +5,8 @@ import io.confluent.kafka.schemaregistry.client.SchemaRegistryClient;
 import io.confluent.kafka.schemaregistry.client.rest.exceptions.RestClientException;
 import io.confluent.pas.agent.common.services.KafkaConfiguration;
 import io.confluent.pas.agent.common.services.RegistrationService;
-import io.confluent.pas.agent.common.services.Schemas;
+import io.confluent.pas.agent.common.services.schemas.Registration;
+import io.confluent.pas.agent.common.services.schemas.RegistrationKey;
 import io.modelcontextprotocol.server.McpAsyncServer;
 import io.modelcontextprotocol.server.McpServerFeatures;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -38,7 +39,7 @@ class RegistrationCoordinatorTest {
     private SchemaRegistryClient schemaRegistryClient;
 
     @Mock
-    private RegistrationService<Schemas.RegistrationKey, Schemas.Registration> registrationService;
+    private RegistrationService<RegistrationKey, Registration> registrationService;
 
     @InjectMocks
     private RegistrationCoordinator registrationCoordinator;
@@ -82,9 +83,9 @@ class RegistrationCoordinatorTest {
         String toolName = "testTool";
         assertFalse(registrationCoordinator.isRegistered(toolName));
 
-        registrationCoordinator.register(new Schemas.Registration(toolName, "description", "request", "response"));
+        registrationCoordinator.register(new Registration(toolName, "description", "request", "response"));
 
-        verify(registrationService, times(1)).register(any(Schemas.RegistrationKey.class), any(Schemas.Registration.class));
+        verify(registrationService, times(1)).register(any(RegistrationKey.class), any(Registration.class));
     }
 
     @Test
@@ -92,9 +93,9 @@ class RegistrationCoordinatorTest {
         String toolName = "testTool";
         assertNull(registrationCoordinator.getRegistrationHandler(toolName));
 
-        var registration = new Schemas.Registration(toolName, "description", "request", "response");
+        var registration = new Registration(toolName, "description", "request", "response");
 
-        registrationCoordinator.onRegistration(Map.of(new Schemas.RegistrationKey(toolName), registration));
+        registrationCoordinator.onRegistration(Map.of(new RegistrationKey(toolName), registration));
         assertNotNull(registrationCoordinator.getRegistrationHandler(toolName));
     }
 
@@ -102,34 +103,34 @@ class RegistrationCoordinatorTest {
     void testGetAllRegistrationHandlers() {
         assertTrue(registrationCoordinator.getAllRegistrationHandlers().isEmpty());
 
-        registrationCoordinator.register(new Schemas.Registration("testTool1", "description", "request", "response"));
-        registrationCoordinator.register(new Schemas.Registration("testTool2", "description", "request", "response"));
+        registrationCoordinator.register(new Registration("testTool1", "description", "request", "response"));
+        registrationCoordinator.register(new Registration("testTool2", "description", "request", "response"));
 
-        verify(registrationService, times(2)).register(any(Schemas.RegistrationKey.class), any(Schemas.Registration.class));
+        verify(registrationService, times(2)).register(any(RegistrationKey.class), any(Registration.class));
     }
 
     @Test
     void testRegister() {
-        Schemas.Registration registration = new Schemas.Registration("testTool", "description", "request", "response");
+        Registration registration = new Registration("testTool", "description", "request", "response");
         registrationCoordinator.register(registration);
 
-        verify(registrationService, times(1)).register(any(Schemas.RegistrationKey.class), eq(registration));
+        verify(registrationService, times(1)).register(any(RegistrationKey.class), eq(registration));
     }
 
     @Test
     void testUnregister() {
         String toolName = "testTool";
-        registrationCoordinator.register(new Schemas.Registration(toolName, "description", "request", "response"));
+        registrationCoordinator.register(new Registration(toolName, "description", "request", "response"));
         registrationCoordinator.unregister(toolName);
 
-        verify(registrationService, times(1)).unregister(any(Schemas.RegistrationKey.class));
+        verify(registrationService, times(1)).unregister(any(RegistrationKey.class));
     }
 
     @Test
     void testOnRegistration() {
-        Schemas.RegistrationKey key = new Schemas.RegistrationKey("testTool");
-        Schemas.Registration registration = new Schemas.Registration("testTool", "description", "request", "response");
-        Map<Schemas.RegistrationKey, Schemas.Registration> registrations = Collections.singletonMap(key, registration);
+        RegistrationKey key = new RegistrationKey("testTool");
+        Registration registration = new Registration("testTool", "description", "request", "response");
+        Map<RegistrationKey, Registration> registrations = Collections.singletonMap(key, registration);
 
         registrationCoordinator.onRegistration(registrations);
 

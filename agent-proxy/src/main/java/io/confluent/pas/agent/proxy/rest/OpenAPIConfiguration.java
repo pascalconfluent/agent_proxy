@@ -4,7 +4,8 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import io.confluent.pas.agent.common.services.Schemas;
+import io.confluent.pas.agent.common.services.schemas.Registration;
+import io.confluent.pas.agent.common.services.schemas.ResourceRegistration;
 import io.confluent.pas.agent.common.utils.JsonUtils;
 import io.confluent.pas.agent.common.utils.UriTemplate;
 import io.confluent.pas.agent.proxy.registration.RegistrationCoordinator;
@@ -107,9 +108,9 @@ public class OpenAPIConfiguration {
 
         registrationHandlers.forEach(handler -> {
             try {
-                final Schemas.Registration registration = handler.getRegistration();
+                final Registration registration = handler.getRegistration();
 
-                if (registration instanceof Schemas.ResourceRegistration resourceRegistration) {
+                if (registration instanceof ResourceRegistration resourceRegistration) {
                     addResourcePathItem(resourceRegistration, registration, pathItems);
                 } else {
                     addStandardPathItem(registration, handler.getSchemas(), pathItems);
@@ -129,7 +130,7 @@ public class OpenAPIConfiguration {
      * @param schemas      the registration schemas
      * @param pathItems    the path items map to update
      */
-    private void addStandardPathItem(Schemas.Registration registration,
+    private void addStandardPathItem(Registration registration,
             RegistrationSchemas schemas,
             Map<String, PathItem> pathItems) {
         final String path = registration.getName();
@@ -160,9 +161,9 @@ public class OpenAPIConfiguration {
      * @param registration         the general registration
      * @param pathItems            the path items map to update
      */
-    private void addResourcePathItem(Schemas.ResourceRegistration resourceRegistration,
-            Schemas.Registration registration,
-            Map<String, PathItem> pathItems) {
+    private void addResourcePathItem(ResourceRegistration resourceRegistration,
+                                     Registration registration,
+                                     Map<String, PathItem> pathItems) {
         final PathItem pathItem = new PathItem();
         final String urlPath = resourceRegistration.getUrl();
 
@@ -244,7 +245,7 @@ public class OpenAPIConfiguration {
      * @param registration the resource registration
      * @return the API response
      */
-    private ApiResponse createApiResponse(Schemas.ResourceRegistration registration) {
+    private ApiResponse createApiResponse(ResourceRegistration registration) {
         final Content content = new Content();
         content.addMediaType(registration.getMimeType(), new MediaType());
 

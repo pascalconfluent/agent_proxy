@@ -2,7 +2,7 @@ package io.confluent.pas.agent.proxy.registration.kafka;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import io.confluent.pas.agent.common.services.KafkaConfiguration;
-import io.confluent.pas.agent.common.services.Schemas;
+import io.confluent.pas.agent.common.services.schemas.Registration;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -76,7 +76,7 @@ public class ConsumerService implements Closeable {
      * @param registrationHandlers Map of correlation IDs to their handlers
      */
     public record RegistrationItem(
-            Schemas.Registration registration,
+            Registration registration,
             Map<String, RegistrationHandler> registrationHandlers) {
     }
 
@@ -129,14 +129,14 @@ public class ConsumerService implements Closeable {
      *
      * @param registrations The collection of registrations to subscribe to
      */
-    public void addRegistrations(Collection<Schemas.Registration> registrations) {
+    public void addRegistrations(Collection<Registration> registrations) {
         if (registrations == null || registrations.isEmpty()) {
             log.warn("No registrations provided to add");
             return;
         }
 
         List<String> topics = registrations.stream()
-                .map(Schemas.Registration::getResponseTopicName)
+                .map(Registration::getResponseTopicName)
                 .collect(Collectors.toList());
 
         log.info("Subscribing to response topics: {}", topics);
@@ -154,7 +154,7 @@ public class ConsumerService implements Closeable {
      * @throws NullPointerException if any parameter is null
      */
     public void registerResponseHandler(
-            Schemas.Registration registration,
+            Registration registration,
             String correlationId,
             ResponseHandler handler,
             ErrorHandler errorHandler) {

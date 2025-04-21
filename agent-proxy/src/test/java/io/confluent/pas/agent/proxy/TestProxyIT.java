@@ -1,7 +1,7 @@
 package io.confluent.pas.agent.proxy;
 
 import io.confluent.pas.agent.common.services.KafkaConfiguration;
-import io.confluent.pas.agent.common.services.Schemas;
+import io.confluent.pas.agent.common.services.schemas.Registration;
 import io.confluent.pas.agent.proxy.frameworks.java.SubscriptionHandler;
 import io.confluent.pas.agent.proxy.frameworks.java.models.Key;
 import io.confluent.pas.agent.proxy.registration.RegistrationCoordinator;
@@ -69,7 +69,7 @@ public class TestProxyIT {
                 String.class,
                 String.class);
 
-        Schemas.Registration registration = new Schemas.Registration(
+        Registration registration = new Registration(
                 "test",
                 "Sample registration",
                 "sample_req",

@@ -4,11 +4,13 @@ import io.confluent.kafka.schemaregistry.client.SchemaRegistryClient;
 import io.confluent.pas.agent.common.services.KafkaConfiguration;
 import io.confluent.pas.agent.common.services.KafkaPropertiesFactory;
 import io.confluent.pas.agent.common.services.RegistrationService;
-import io.confluent.pas.agent.common.services.Schemas;
+import io.confluent.pas.agent.common.services.schemas.Registration;
+import io.confluent.pas.agent.common.services.schemas.RegistrationKey;
+import io.confluent.pas.agent.common.services.schemas.ResourceRegistration;
 import io.confluent.pas.agent.proxy.registration.events.DeletedRegistrationEvent;
 import io.confluent.pas.agent.proxy.registration.events.NewRegistrationEvent;
-import io.confluent.pas.agent.proxy.registration.handlers.ResourceHandler;
-import io.confluent.pas.agent.proxy.registration.handlers.ToolHandler;
+import io.confluent.pas.agent.proxy.registration.handlers.mcp.ResourceHandler;
+import io.confluent.pas.agent.proxy.registration.handlers.mcp.ToolHandler;
 import io.modelcontextprotocol.server.McpAsyncServer;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.DisposableBean;
@@ -32,7 +34,7 @@ public class RegistrationCoordinator implements DisposableBean {
     private final McpAsyncServer mcpServer;
     private final Map<String, RegistrationHandler<?, ?>> handlers = new ConcurrentHashMap<>();
     private final SchemaRegistryClient schemaRegistryClient;
-    private final RegistrationService<Schemas.RegistrationKey, Schemas.Registration> registrationService;
+    private final RegistrationService<RegistrationKey, Registration> registrationService;
     private final ApplicationEventPublisher applicationEventPublisher;
 
     @Autowired
@@ -58,15 +60,15 @@ public class RegistrationCoordinator implements DisposableBean {
         this.applicationEventPublisher = applicationEventPublisher;
         this.registrationService = new RegistrationService<>(
                 kafkaConfiguration,
-                Schemas.RegistrationKey.class,
-                Schemas.Registration.class,
+                RegistrationKey.class,
+                Registration.class,
                 this::onRegistration);
     }
 
     public RegistrationCoordinator(RequestResponseHandler requestResponseHandler,
                                    McpAsyncServer mcpServer,
                                    SchemaRegistryClient schemaRegistryClient,
-                                   RegistrationService<Schemas.RegistrationKey, Schemas.Registration> registrationService,
+                                   RegistrationService<RegistrationKey, Registration> registrationService,
                                    ApplicationEventPublisher applicationEventPublisher) {
         this.requestResponseHandler = requestResponseHandler;
         this.mcpServer = mcpServer;
@@ -109,7 +111,7 @@ public class RegistrationCoordinator implements DisposableBean {
      *
      * @return The registrations
      */
-    public List<Schemas.Registration> getAllRegistrations() {
+    public List<Registration> getAllRegistrations() {
         return registrationService.getAllRegistrations();
     }
 
@@ -118,8 +120,8 @@ public class RegistrationCoordinator implements DisposableBean {
      *
      * @param registration The registration
      */
-    public void register(Schemas.Registration registration) {
-        registrationService.register(new Schemas.RegistrationKey(registration.getName()), registration);
+    public void register(Registration registration) {
+        registrationService.register(new RegistrationKey(registration.getName()), registration);
     }
 
     /**
@@ -128,7 +130,7 @@ public class RegistrationCoordinator implements DisposableBean {
      * @param name The registration name to delete
      */
     public void unregister(String name) {
-        registrationService.unregister(new Schemas.RegistrationKey(name));
+        registrationService.unregister(new RegistrationKey(name));
     }
 
     /**
@@ -136,13 +138,13 @@ public class RegistrationCoordinator implements DisposableBean {
      *
      * @param registrations The registrations
      */
-    void onRegistration(Map<Schemas.RegistrationKey, Schemas.Registration> registrations) {
+    void onRegistration(Map<RegistrationKey, Registration> registrations) {
         requestResponseHandler.addRegistrations(registrations.values());
 
         registrations.forEach(this::onRegistration);
     }
 
-    private void onRegistration(Schemas.RegistrationKey key, Schemas.Registration registration) {
+    private void onRegistration(RegistrationKey key, Registration registration) {
         final String registrationName = key.getName();
 
         // Unregister?
@@ -164,7 +166,7 @@ public class RegistrationCoordinator implements DisposableBean {
         }
 
         try {
-            final RegistrationHandler<?, ?> handler = (registration instanceof Schemas.ResourceRegistration rcsRegistration)
+            final RegistrationHandler<?, ?> handler = (registration instanceof ResourceRegistration rcsRegistration)
                     ? new ResourceHandler(rcsRegistration, schemaRegistryClient, requestResponseHandler)
                     : new ToolHandler(registration, schemaRegistryClient, requestResponseHandler);
 

@@ -3,8 +3,11 @@ package io.confluent.pas.agent.proxy.registration.handlers;
 import com.fasterxml.jackson.databind.JsonNode;
 import io.confluent.kafka.schemaregistry.client.SchemaRegistryClient;
 import io.confluent.kafka.schemaregistry.client.rest.exceptions.RestClientException;
-import io.confluent.pas.agent.common.services.Schemas;
+import io.confluent.pas.agent.common.services.schemas.ResourceRegistration;
+import io.confluent.pas.agent.common.services.schemas.ResourceRequest;
+import io.confluent.pas.agent.common.services.schemas.ResourceResponse;
 import io.confluent.pas.agent.proxy.registration.RequestResponseHandler;
+import io.confluent.pas.agent.proxy.registration.handlers.mcp.ResourceHandler;
 import io.modelcontextprotocol.server.McpAsyncServer;
 import io.modelcontextprotocol.spec.McpSchema;
 import org.junit.jupiter.api.BeforeEach;
@@ -24,7 +27,7 @@ import static org.mockito.Mockito.*;
 class ResourceHandlerTest {
 
     @Mock
-    private Schemas.ResourceRegistration registration;
+    private ResourceRegistration registration;
 
     @Mock
     private SchemaRegistryClient schemaRegistryClient;
@@ -77,13 +80,13 @@ class ResourceHandlerTest {
 
     @Test
     void testSendRequest() throws ExecutionException, InterruptedException {
-        Schemas.ResourceRequest request = new Schemas.ResourceRequest();
+        ResourceRequest request = new ResourceRequest();
         Map<String, Object> arguments = Map.of("key", "value");
 
         when(requestResponseHandler.sendRequestResponse(any(), any(), anyString(), anyMap()))
                 .thenReturn(Mono.just(mock(JsonNode.class)));
 
-        Mono<Schemas.ResourceResponse> result = resourceHandler.sendRequest(request);
+        Mono<ResourceResponse> result = resourceHandler.sendRequest(request);
         assertNotNull(result);
         verify(requestResponseHandler).sendRequestResponse(any(), any(), anyString(), anyMap());
     }

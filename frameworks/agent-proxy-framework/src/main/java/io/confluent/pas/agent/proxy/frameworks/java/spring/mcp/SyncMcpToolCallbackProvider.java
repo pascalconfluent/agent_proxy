@@ -1,6 +1,6 @@
 package io.confluent.pas.agent.proxy.frameworks.java.spring.mcp;
 
-import io.confluent.pas.agent.common.services.Schemas;
+import io.confluent.pas.agent.common.services.schemas.Registration;
 import io.modelcontextprotocol.client.McpSyncClient;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -29,7 +29,7 @@ public class SyncMcpToolCallbackProvider extends McpToolFilters<SyncMcpToolCallb
      * @param registration Tool registration information
      * @param clients      List of synchronous MCP clients
      */
-    public SyncMcpToolCallbackProvider(Schemas.Registration registration, List<McpSyncClient> clients) {
+    public SyncMcpToolCallbackProvider(Registration registration, List<McpSyncClient> clients) {
         super(registration);
         this.clients = clients;
     }
@@ -40,7 +40,7 @@ public class SyncMcpToolCallbackProvider extends McpToolFilters<SyncMcpToolCallb
      * @param registration Tool registration information
      * @param clients      Variable number of synchronous MCP clients
      */
-    public SyncMcpToolCallbackProvider(Schemas.Registration registration, McpSyncClient... clients) {
+    public SyncMcpToolCallbackProvider(Registration registration, McpSyncClient... clients) {
         super(registration);
         this.clients = List.of(clients);
     }

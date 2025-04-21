@@ -1,6 +1,6 @@
 package io.confluent.pas.agent.proxy.registration.events;
 
-import io.confluent.pas.agent.common.services.Schemas;
+import io.confluent.pas.agent.common.services.schemas.Registration;
 import lombok.Getter;
 import org.springframework.context.ApplicationEvent;
 
@@ -10,9 +10,9 @@ import org.springframework.context.ApplicationEvent;
 @Getter
 public class NewRegistrationEvent extends ApplicationEvent {
 
-    private final Schemas.Registration registration;
+    private final Registration registration;
 
-    public NewRegistrationEvent(Object source, Schemas.Registration registration) {
+    public NewRegistrationEvent(Object source, Registration registration) {
         super(source);
         this.registration = registration;
     }

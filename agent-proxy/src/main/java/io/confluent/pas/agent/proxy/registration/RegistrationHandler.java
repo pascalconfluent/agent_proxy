@@ -1,6 +1,6 @@
 package io.confluent.pas.agent.proxy.registration;
 
-import io.confluent.pas.agent.common.services.Schemas;
+import io.confluent.pas.agent.common.services.schemas.Registration;
 import io.confluent.pas.agent.proxy.registration.schemas.RegistrationSchemas;
 import io.modelcontextprotocol.server.McpAsyncServer;
 import reactor.core.publisher.Mono;
@@ -17,7 +17,7 @@ public interface RegistrationHandler<REQ, RES> {
      *
      * @return the registration
      */
-    Schemas.Registration getRegistration();
+    Registration getRegistration();
 
     /**
      * Gets the registration schemas for the tool or resource.

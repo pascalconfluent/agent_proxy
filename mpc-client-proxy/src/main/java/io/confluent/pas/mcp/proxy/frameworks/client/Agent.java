@@ -16,7 +16,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import io.confluent.kafka.schemaregistry.json.JsonSchema;
 import io.confluent.pas.agent.common.services.KafkaConfiguration;
-import io.confluent.pas.agent.common.services.Schemas;
+import io.confluent.pas.agent.common.services.schemas.Registration;
 import io.confluent.pas.agent.common.utils.JsonUtils;
 import io.confluent.pas.mcp.proxy.frameworks.client.internal.*;
 import io.confluent.pas.agent.proxy.frameworks.java.SubscriptionHandler;
@@ -102,7 +102,7 @@ public class Agent {
      */
     private void setupSubscriptionHandler(List<AgentToolHandler> agentToolHandlers) {
         agentToolHandlers.forEach(handler -> {
-            final Schemas.Registration registration = new Schemas.Registration(
+            final Registration registration = new Registration(
                     handler.mcpTool().name(),
                     handler.mcpTool().description(),
                     handler.tool().getRequest_topic(),
