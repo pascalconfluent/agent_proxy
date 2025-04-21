@@ -4,7 +4,6 @@ import io.confluent.pas.agent.common.services.schemas.ResourceRequest;
 import io.confluent.pas.agent.common.services.schemas.TextResourceResponse;
 import io.confluent.pas.agent.common.utils.UriTemplate;
 import io.confluent.pas.agent.proxy.frameworks.java.Request;
-import io.confluent.pas.agent.proxy.frameworks.java.models.Key;
 import io.confluent.pas.agent.proxy.frameworks.java.spring.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -43,7 +42,7 @@ public class ResourceAgent {
             path = URI,
             responseClass = TextResourceResponse.class
     )
-    public void onRequest(Request<Key, ResourceRequest, TextResourceResponse> request) {
+    public void onRequest(Request<ResourceRequest, TextResourceResponse> request) {
         log.info("Received request: {}", request.getRequest().getUri());
 
         // Extract values from the URI using the template

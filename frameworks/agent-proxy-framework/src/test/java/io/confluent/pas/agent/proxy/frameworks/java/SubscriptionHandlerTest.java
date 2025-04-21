@@ -37,7 +37,7 @@ public class SubscriptionHandlerTest {
     @Mock
     private KafkaStreams kStreams;
 
-    private SubscriptionHandler<Key, Request, Response> subscriptionHandler;
+    private SubscriptionHandler<Request, Response> subscriptionHandler;
 
     @BeforeEach
     public void setUp() {
@@ -55,7 +55,6 @@ public class SubscriptionHandlerTest {
 
         subscriptionHandler = new SubscriptionHandler<>(
                 kafkaConfiguration,
-                Key.class,
                 Request.class,
                 Response.class,
                 registrationService,

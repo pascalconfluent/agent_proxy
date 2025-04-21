@@ -16,12 +16,12 @@ import static org.mockito.Mockito.*;
 public class SubscriptionHandlerProcessorTest {
 
     @Mock
-    private RequestHandler<Key, String, String> requestHandler;
+    private RequestHandler<String, String> requestHandler;
 
     @Mock
     private ProcessorContext<Key, String> context;
 
-    private SubscriptionHandlerProcessor<Key, String, String> processor;
+    private SubscriptionHandlerProcessor<String, String> processor;
 
     @BeforeEach
     public void setUp() {
@@ -42,7 +42,7 @@ public class SubscriptionHandlerProcessorTest {
         ArgumentCaptor<Request> requestCaptor = ArgumentCaptor.forClass(Request.class);
         verify(requestHandler, times(1)).onRequest(requestCaptor.capture());
 
-        Request<Key, String, String> capturedRequest = requestCaptor.getValue();
+        Request<String, String> capturedRequest = requestCaptor.getValue();
         assertEquals(key, capturedRequest.getKey());
         assertEquals(value, capturedRequest.getRequest());
     }
@@ -51,7 +51,7 @@ public class SubscriptionHandlerProcessorTest {
     public void testSendResponse() {
         Key key = new Key("testKey");
         String responseValue = "responseValue";
-        Response<Key, String> response = new Response<>(key, responseValue);
+        Response<String> response = new Response<>(key, responseValue);
 
         processor.sendResponse(response);
 

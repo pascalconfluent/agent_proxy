@@ -39,7 +39,7 @@ public class AgentRegistrarTest {
     private KafkaConfiguration kafkaConfiguration;
 
     @Mock
-    private SubscriptionHandler<?, ?, ?> subscriptionHandler;
+    private SubscriptionHandler<?, ?> subscriptionHandler;
 
     private AgentRegistrar agentRegistrar;
 
@@ -57,7 +57,7 @@ public class AgentRegistrarTest {
         when(kafkaConfiguration.topicConfiguration()).thenReturn(new KafkaConfiguration.DefaultTopicConfiguration());
         when(kafkaConfiguration.saslMechanism()).thenReturn(KafkaConfiguration.DEFAULT_SASL_MECHANISM);
 
-        agentRegistrar = new AgentRegistrar(applicationContext, (keyClass, requestClass, responseClass) -> subscriptionHandler);
+        agentRegistrar = new AgentRegistrar(applicationContext, (requestClass, responseClass) -> subscriptionHandler);
     }
 
     @Test

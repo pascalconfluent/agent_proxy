@@ -27,6 +27,5 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Key {
-
     private String correlationId;
 }

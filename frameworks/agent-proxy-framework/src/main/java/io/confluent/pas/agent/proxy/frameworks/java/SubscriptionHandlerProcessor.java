@@ -5,23 +5,23 @@ import org.apache.kafka.streams.processor.api.Processor;
 import org.apache.kafka.streams.processor.api.ProcessorContext;
 import org.apache.kafka.streams.processor.api.Record;
 
-public class SubscriptionHandlerProcessor<K extends Key, REQ, RES> implements Processor<K, REQ, K, RES> {
+public class SubscriptionHandlerProcessor<REQ, RES> implements Processor<Key, REQ, Key, RES> {
 
-    private final SubscriptionHandler.RequestHandler<K, REQ, RES> subscriptionHandler;
-    private ProcessorContext<K, RES> context;
+    private final SubscriptionHandler.RequestHandler<REQ, RES> subscriptionHandler;
+    private ProcessorContext<Key, RES> context;
 
-    public SubscriptionHandlerProcessor(SubscriptionHandler.RequestHandler<K, REQ, RES> subscriptionHandler) {
+    public SubscriptionHandlerProcessor(SubscriptionHandler.RequestHandler<REQ, RES> subscriptionHandler) {
         this.subscriptionHandler = subscriptionHandler;
     }
 
     @Override
-    public void init(ProcessorContext<K, RES> context) {
+    public void init(ProcessorContext<Key, RES> context) {
         this.context = context;
     }
 
     @Override
-    public void process(Record<K, REQ> record) {
-        final Request<K, REQ, RES> request = new Request<>(
+    public void process(Record<Key, REQ> record) {
+        final Request<REQ, RES> request = new Request<>(
                 record.key(),
                 record.value(),
                 this::sendResponse);
@@ -29,7 +29,7 @@ public class SubscriptionHandlerProcessor<K extends Key, REQ, RES> implements Pr
         subscriptionHandler.onRequest(request);
     }
 
-    void sendResponse(Response<K, RES> response) {
+    void sendResponse(Response<RES> response) {
         context.forward(new Record<>(
                 response.key(),
                 response.response(),

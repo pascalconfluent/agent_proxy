@@ -5,7 +5,6 @@ import io.confluent.pas.agent.common.services.schemas.Registration;
 import io.confluent.pas.agent.common.services.schemas.ResourceRegistration;
 import io.confluent.pas.agent.common.services.schemas.ResourceRequest;
 import io.confluent.pas.agent.proxy.frameworks.java.SubscriptionHandler;
-import io.confluent.pas.agent.proxy.frameworks.java.models.Key;
 import lombok.Builder;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -37,9 +36,7 @@ public class AgentRegistrar implements InitializingBean, Closeable {
      * Supplier for creating SubscriptionHandlers
      */
     public interface SubscriptionHandlerSupplier {
-        SubscriptionHandler<? extends Key, ?, ?> get(Class<? extends Key> keyClass,
-                                                     Class<?> requestClass,
-                                                     Class<?> responseClass);
+        SubscriptionHandler<?, ?> get(Class<?> requestClass, Class<?> responseClass);
     }
 
     /**
@@ -51,7 +48,7 @@ public class AgentRegistrar implements InitializingBean, Closeable {
      */
     @Builder
     record InvocationHandler(MethodHandle method,
-                             SubscriptionHandler<?, ?, ?> subscriptionHandler) implements Closeable {
+                             SubscriptionHandler<?, ?> subscriptionHandler) implements Closeable {
 
         /**
          * Subscribes the handler to the specified registration.
@@ -107,8 +104,8 @@ public class AgentRegistrar implements InitializingBean, Closeable {
     public AgentRegistrar(KafkaConfiguration kafkaConfiguration,
                           ApplicationContext applicationContext) {
         this(applicationContext,
-                (keyClass, requestClass, responseClass) ->
-                        new SubscriptionHandler<>(kafkaConfiguration, keyClass, requestClass, responseClass)
+                (requestClass, responseClass) ->
+                        new SubscriptionHandler<>(kafkaConfiguration, requestClass, responseClass)
         );
 
     }
@@ -190,7 +187,6 @@ public class AgentRegistrar implements InitializingBean, Closeable {
 
         // Create and start a subscription handler for the resource
         var subscriptionHandler = subscriptionHandlerSupplier.get(
-                resource.keyClass(),
                 ResourceRequest.class,
                 resource.responseClass());
 
@@ -218,7 +214,6 @@ public class AgentRegistrar implements InitializingBean, Closeable {
 
         // Create and start a subscription handler for the agent
         var subscriptionHandler = subscriptionHandlerSupplier.get(
-                agent.keyClass(),
                 agent.requestClass(),
                 agent.responseClass());
 
@@ -235,7 +230,7 @@ public class AgentRegistrar implements InitializingBean, Closeable {
      * @return Invocation handler for the method
      */
     @NotNull
-    private InvocationHandler getInvocationHandler(Method method, Object bean, Registration registration, SubscriptionHandler<?, ?, ?> subscriptionHandler) {
+    private InvocationHandler getInvocationHandler(Method method, Object bean, Registration registration, SubscriptionHandler<?, ?> subscriptionHandler) {
         try {
             // Create a MethodHandle for the method to allow dynamic invocation
             MethodHandles.Lookup lookup = MethodHandles.lookup();

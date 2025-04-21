@@ -3,6 +3,7 @@ package io.confluent.pas.agent.proxy.registration.kafka;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.confluent.pas.agent.common.services.schemas.Registration;
+import io.confluent.pas.agent.proxy.frameworks.java.models.Key;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -19,7 +20,7 @@ import static org.mockito.Mockito.*;
 class ConsumerServiceTest {
 
     @Mock
-    private Consumer<JsonNode, JsonNode> consumer;
+    private Consumer<Key, JsonNode> consumer;
 
     private ConsumerService consumerService;
 
@@ -63,7 +64,7 @@ class ConsumerServiceTest {
         consumerService.registerResponseHandler(registration, "correlationId", handler, errorHandler);
 
         ObjectMapper mapper = new ObjectMapper();
-        JsonNode key = mapper.readTree("{\"correlationId\": \"correlationId\"}");
+        Key key = new Key("correlationId");
         JsonNode message = mapper.readTree("{\"message\": \"testMessage\"}");
 
         consumerService.handleResponse("responseTopic", key, message);

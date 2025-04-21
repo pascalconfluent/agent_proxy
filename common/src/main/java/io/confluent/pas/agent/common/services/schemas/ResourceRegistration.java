@@ -104,21 +104,9 @@ public class ResourceRegistration extends Registration {
                                 String description,
                                 String requestTopicName,
                                 String responseTopicName,
-                                String correlationIdFieldName,
                                 String mimeType,
                                 String url) {
-        super(RESOURCE, name, description, requestTopicName, responseTopicName, correlationIdFieldName);
-        this.mimeType = mimeType;
-        setUrl(url);
-    }
-
-    public ResourceRegistration(String name,
-                                String description,
-                                String requestTopicName,
-                                String responseTopicName,
-                                String mimeType,
-                                String url) {
-        super(RESOURCE, name, description, requestTopicName, responseTopicName, CORRELATION_ID_FIELD_NAME);
+        super(RESOURCE, name, description, requestTopicName, responseTopicName);
         this.mimeType = mimeType;
         setUrl(url);
     }

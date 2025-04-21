@@ -51,7 +51,7 @@ public class AgentRequestHandler {
      *
      * @param request The incoming request containing key, generic request data, and JSON payload
      */
-    public void handleRequest(Request<Key, JsonNode, JsonNode> request) {
+    public void handleRequest(Request<JsonNode, JsonNode> request) {
         final Map<String, Object> genericRequest = JsonUtils.toMap(request.getRequest());
 
         mcpAsyncClient.callTool(new McpSchema.CallToolRequest(tool.getName(), genericRequest))
@@ -69,7 +69,7 @@ public class AgentRequestHandler {
      * @return A Mono completing when the response is processed
      * @throws AgentException if response processing fails or unexpected response type is received
      */
-    private Mono<Void> processToolResponse(McpSchema.CallToolResult result, Request<Key, JsonNode, JsonNode> request) {
+    private Mono<Void> processToolResponse(McpSchema.CallToolResult result, Request<JsonNode, JsonNode> request) {
         if (!(result.content().getFirst() instanceof McpSchema.TextContent textContent)) {
             return Mono.error(new AgentException("Unexpected response type"));
         }

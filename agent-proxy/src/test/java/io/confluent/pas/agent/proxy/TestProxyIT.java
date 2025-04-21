@@ -63,9 +63,8 @@ public class TestProxyIT {
     public void testToolRegistration() throws InterruptedException {
         listener.reset();
 
-        final SubscriptionHandler<Key, String, String> handler = new SubscriptionHandler<>(
+        final SubscriptionHandler<String, String> handler = new SubscriptionHandler<>(
                 kafkaConfiguration,
-                Key.class,
                 String.class,
                 String.class);
 

@@ -3,7 +3,6 @@ package io.confluent.pas.agent.exemple;
 import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.googleai.GoogleAiGeminiChatModel;
 import dev.langchain4j.service.AiServices;
-import io.confluent.pas.agent.proxy.frameworks.java.models.Key;
 import io.confluent.pas.agent.proxy.frameworks.java.Request;
 import io.confluent.pas.agent.proxy.frameworks.java.spring.annotation.Agent;
 import lombok.extern.slf4j.Slf4j;
@@ -53,7 +52,7 @@ public class AgentInstance {
             requestClass = AgentQuery.class,
             responseClass = AgentResponse.class
     )
-    public void onRequest(Request<Key, AgentQuery, AgentResponse> request) {
+    public void onRequest(Request<AgentQuery, AgentResponse> request) {
         log.info("Received request: {}", request.getRequest().query());
 
         // Process the query using the assistant and get the response

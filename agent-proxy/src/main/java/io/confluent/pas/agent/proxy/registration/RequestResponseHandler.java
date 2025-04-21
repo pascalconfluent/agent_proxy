@@ -3,6 +3,7 @@ package io.confluent.pas.agent.proxy.registration;
 import com.fasterxml.jackson.databind.JsonNode;
 import io.confluent.pas.agent.common.services.KafkaConfiguration;
 import io.confluent.pas.agent.common.services.schemas.Registration;
+import io.confluent.pas.agent.proxy.frameworks.java.models.Key;
 import io.confluent.pas.agent.proxy.registration.kafka.ProducerService;
 import io.confluent.pas.agent.proxy.registration.kafka.ConsumerService;
 import io.confluent.pas.agent.proxy.registration.schemas.RegistrationSchemas;
@@ -69,7 +70,7 @@ public class RequestResponseHandler implements DisposableBean {
                                               String correlationId,
                                               Map<String, Object> request)
             throws ExecutionException, InterruptedException {
-        final Map<String, Object> key = Map.of(registration.getCorrelationIdFieldName(), correlationId);
+        final Key key = new Key(correlationId);
 
         final Observation observation = Observation.start("agent.proxy." + registration.getName(), observationRegistry)
                 .contextualName("sendRequestResponse")
@@ -79,7 +80,7 @@ public class RequestResponseHandler implements DisposableBean {
         return Objects.requireNonNull(observation.observe(() -> sendRequestResponse(
                         registration,
                         correlationId,
-                        schemas.getRequestKeySchema().envelope(key),
+                        key,
                         schemas.getRequestSchema().envelope(request))))
                 .doOnError(observation::error)
                 .doFinally(signalType -> observation.stop());
@@ -96,7 +97,7 @@ public class RequestResponseHandler implements DisposableBean {
      */
     public Mono<JsonNode> sendRequestResponse(Registration registration,
                                               String correlationId,
-                                              JsonNode key,
+                                              Key key,
                                               JsonNode request) {
         Sinks.One<JsonNode> sink = Sinks.one();
 

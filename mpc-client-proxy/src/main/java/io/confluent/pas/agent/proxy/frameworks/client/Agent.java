@@ -19,9 +19,7 @@ import io.confluent.pas.agent.common.services.KafkaConfiguration;
 import io.confluent.pas.agent.common.services.schemas.Registration;
 import io.confluent.pas.agent.common.utils.JsonUtils;
 import io.confluent.pas.agent.proxy.frameworks.client.internal.*;
-import io.confluent.pas.agent.proxy.frameworks.client.internal.*;
 import io.confluent.pas.agent.proxy.frameworks.java.SubscriptionHandler;
-import io.confluent.pas.agent.proxy.frameworks.java.models.Key;
 import io.confluent.pas.agent.proxy.frameworks.client.exceptions.AgentException;
 import io.modelcontextprotocol.client.McpAsyncClient;
 import io.modelcontextprotocol.client.McpClient;
@@ -47,7 +45,7 @@ public class Agent {
     private final KafkaConfiguration kafkaConfiguration;
 
     // List of handlers managing subscriptions to Kafka topics.
-    private final List<SubscriptionHandler<Key, JsonNode, JsonNode>> handlers = new ArrayList<>();
+    private final List<SubscriptionHandler<JsonNode, JsonNode>> handlers = new ArrayList<>();
 
     /**
      * Constructs an Agent instance and initializes the MCP client with Stdio transport.
@@ -109,9 +107,8 @@ public class Agent {
                     handler.tool().getRequest_topic(),
                     handler.tool().getResponse_topic());
 
-            final SubscriptionHandler<Key, JsonNode, JsonNode> subscriptionHandler = new SubscriptionHandler<>(
+            final SubscriptionHandler<JsonNode, JsonNode> subscriptionHandler = new SubscriptionHandler<>(
                     new KafkaToolConfiguration(kafkaConfiguration, handler.tool()),
-                    Key.class,
                     JsonNode.class,
                     JsonNode.class);
 

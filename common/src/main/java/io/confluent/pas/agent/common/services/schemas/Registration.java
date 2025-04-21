@@ -98,15 +98,9 @@ public class Registration {
     private String requestTopicName;
     @JsonProperty(value = "responseTopicName", required = true)
     private String responseTopicName;
-    @JsonProperty(value = "correlationIdFieldName", defaultValue = CORRELATION_ID_FIELD_NAME)
-    private String correlationIdFieldName;
 
     public Registration(String name, String description, String requestTopicName, String responseTopicName) {
-        this(TOOL, name, description, requestTopicName, responseTopicName, CORRELATION_ID_FIELD_NAME);
-    }
-
-    public Registration(String name, String description, String requestTopicName, String responseTopicName, String correlationIdFieldName) {
-        this(TOOL, name, description, requestTopicName, responseTopicName, correlationIdFieldName);
+        this(TOOL, name, description, requestTopicName, responseTopicName);
     }
 
     @JsonIgnore

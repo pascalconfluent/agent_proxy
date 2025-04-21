@@ -1,5 +1,6 @@
 package io.confluent.pas.agent.proxy.frameworks.java;
 
+import io.confluent.pas.agent.proxy.frameworks.java.models.Key;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -10,25 +11,24 @@ import java.util.function.Consumer;
 /**
  * Request class that holds the key and the request object
  *
- * @param <K>   Key type
  * @param <REQ> Request type
  * @param <RES> Response type
  */
 @Slf4j
 @AllArgsConstructor
-public class Request<K, REQ, RES> {
+public class Request<REQ, RES> {
     @Getter
-    private final K key;
+    private final Key key;
     @Getter
     private final REQ request;
-    private final Consumer<Response<K, RES>> responseConsumer;
+    private final Consumer<Response<RES>> responseConsumer;
 
     /**
      * Respond to the request
      *
      * @param response Response object
      */
-    public Mono<Void> respond(Response<K, RES> response) {
+    public Mono<Void> respond(Response<RES> response) {
         return Mono.create(sink -> {
             try {
                 responseConsumer.accept(response);
