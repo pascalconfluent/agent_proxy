@@ -7,7 +7,7 @@ import reactor.core.publisher.Mono;
 /**
  * Interface for handling registration of tools and resources.
  */
-public interface RegistrationHandler<SRV> {
+public interface RegistrationHandler {
 
     /**
      * Gets the registration for the tool or resource.
@@ -22,7 +22,7 @@ public interface RegistrationHandler<SRV> {
      * @return the registration schemas
      */
     RegistrationSchemas getSchemas();
-    
+
     /**
      * Initializes the tool or resource with the specified server.
      *

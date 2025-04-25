@@ -6,8 +6,6 @@ import io.confluent.pas.agent.common.services.schemas.Registration;
 import io.confluent.pas.agent.proxy.frameworks.java.models.Key;
 import io.confluent.pas.agent.proxy.registration.kafka.ProducerService;
 import io.confluent.pas.agent.proxy.registration.kafka.ConsumerService;
-import io.confluent.pas.agent.proxy.registration.schemas.RegistrationSchemas;
-import io.micrometer.observation.Observation;
 import io.micrometer.observation.ObservationRegistry;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.DisposableBean;
@@ -15,12 +13,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
-import reactor.core.publisher.Sinks;
 
 import java.util.Collection;
-import java.util.Map;
-import java.util.Objects;
-import java.util.concurrent.ExecutionException;
 
 /**
  * Handle requests and responses
@@ -65,66 +59,14 @@ public class RequestResponseHandler implements DisposableBean {
                 errorHandler);
     }
 
+    public void unregisterHandler(Registration registration, String correlationId) {
+        consumerService.unregisterResponseHandler(registration, correlationId);
+    }
+
     public Mono<Void> sendRequest(Registration registration,
                                   Key key,
                                   JsonNode request) {
         return producerService.send(registration.getRequestTopicName(), key, request);
-    }
-
-    /**
-     * Send a request to a topic and wait for a response
-     *
-     * @param registration  the registration
-     * @param schemas       the schemas
-     * @param correlationId the correlation id
-     * @param request       the request
-     * @return the response
-     * @throws ExecutionException   if the request fails
-     * @throws InterruptedException if the request is interrupted
-     */
-    public Mono<JsonNode> sendRequestResponse(Registration registration,
-                                              RegistrationSchemas schemas,
-                                              String correlationId,
-                                              Map<String, Object> request)
-            throws ExecutionException, InterruptedException {
-        final Observation observation = Observation.start("agent.proxy." + registration.getName(), observationRegistry)
-                .contextualName("sendRequestResponse")
-                .lowCardinalityKeyValue("correlationId", correlationId)
-                .highCardinalityKeyValue("name", registration.getName());
-
-        return Objects.requireNonNull(observation.observe(() -> sendRequestResponse(
-                        registration,
-                        new Key(correlationId),
-                        schemas.getRequestSchema().envelope(request))))
-                .doOnError(observation::error)
-                .doFinally(signalType -> observation.stop());
-    }
-
-    /**
-     * Send a request to a topic and wait for a response
-     *
-     * @param registration the registration
-     * @param key          the key
-     * @param request      the request
-     * @return the response
-     */
-    public Mono<JsonNode> sendRequestResponse(Registration registration,
-                                              Key key,
-                                              JsonNode request) {
-        Sinks.One<JsonNode> sink = Sinks.one();
-
-        // Register the response handler
-        consumerService.registerResponseHandler(
-                registration,
-                key.getCorrelationId(),
-                sink::tryEmitValue,
-                sink::tryEmitError);
-
-        // Send the request
-        return producerService.send(registration.getRequestTopicName(), key, request)
-                .doOnError(sink::tryEmitError)
-                .doOnSuccess(metadata -> log.info("Sent request to topic: {}", registration.getRequestTopicName()))
-                .then(sink.asMono());
     }
 
     @Override

@@ -29,12 +29,12 @@ public @interface Resource {
     /**
      * The Kafka topic name where resource requests will be received.
      */
-    String request_topic();
+    String request_topic() default "";
 
     /**
      * The Kafka topic name where resource responses will be sent.
      */
-    String response_topic();
+    String response_topic() default "";
 
     /**
      * The MIME type of the resource content.

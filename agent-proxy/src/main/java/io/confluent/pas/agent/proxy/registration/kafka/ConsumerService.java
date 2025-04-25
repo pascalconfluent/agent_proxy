@@ -150,7 +150,6 @@ public class ConsumerService implements Closeable {
      * @param correlationId The correlation ID to associate with the handler
      * @param handler       The handler to process responses
      * @param errorHandler  The handler to process errors
-     *
      * @throws NullPointerException if any parameter is null
      */
     public void registerResponseHandler(
@@ -194,6 +193,34 @@ public class ConsumerService implements Closeable {
 
             return existingItem;
         });
+    }
+
+
+    /**
+     * Unregisters a handler for responses with a specific correlation ID.
+     *
+     * @param registration  The service registration details
+     * @param correlationId The correlation ID to unregister
+     * @throws NullPointerException if any parameter is null
+     */
+    public void unregisterResponseHandler(Registration registration, String correlationId) {
+        Objects.requireNonNull(registration, "Registration must not be null");
+        Objects.requireNonNull(correlationId, "CorrelationId must not be null");
+
+        final String responseTopic = registration.getResponseTopicName();
+        final String normalizedCorrelationId = correlationId.toLowerCase();
+
+        log.info("Unregistering response handler for topic: {} with correlation ID: {}",
+                responseTopic, normalizedCorrelationId);
+
+        RegistrationItem registrationItem = responseHandlers.get(responseTopic);
+        if (registrationItem != null) {
+            Map<String, RegistrationHandler> handlers = registrationItem.registrationHandlers();
+            handlers.remove(normalizedCorrelationId);
+            log.debug("Handler removed for correlation ID: {}", normalizedCorrelationId);
+        } else {
+            log.warn("No registration item found for topic: {}", responseTopic);
+        }
     }
 
     /**

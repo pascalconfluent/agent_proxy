@@ -36,8 +36,6 @@ public class ResourceAgent {
     @Resource(
             name = "resource-agent--rcs",
             description = "This agent returns resources.",
-            request_topic = "resource-request",
-            response_topic = "resource-response",
             contentType = MIME_TYPE,
             path = URI,
             responseClass = TextResourceResponse.class

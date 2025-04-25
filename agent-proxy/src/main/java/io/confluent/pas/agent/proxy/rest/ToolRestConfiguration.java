@@ -30,10 +30,12 @@ public class ToolRestConfiguration {
     @Bean
     public RouterFunction<ServerResponse> createRoute(RegistrationCoordinator registrationCoordinator,
                                                       ToolRestController toolRestController) {
-        final RouterFunctions.Builder route = route()
-                .POST("/api/{toolName}", accept(APPLICATION_JSON), toolRestController::processRequest);
+        final RouterFunctions.Builder route = route().POST(
+                "/api/{toolName}",
+                accept(APPLICATION_JSON),
+                toolRestController::processRequest);
 
-        // Create a route for all get
+        // Create a route for all GET requests to the resource handlers
         final List<CompositeHandler> registrationHandlers = registrationCoordinator.getAllRegistrationHandlers();
         registrationHandlers.stream()
                 .map(RegistrationHandler::getRegistration)
@@ -41,7 +43,10 @@ public class ToolRestConfiguration {
                 .map(r -> (ResourceRegistration) r)
                 .forEach(registration -> {
                     final String url = registration.getUrl();
-                    route.GET("/rcs/" + url, accept(APPLICATION_JSON), toolRestController::processRequest);
+
+                    route.GET("/rcs/" + url,
+                            accept(APPLICATION_JSON),
+                            toolRestController::processGetRequest);
                 });
 
         return route.build();

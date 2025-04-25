@@ -1,4 +1,4 @@
-package io.confluent.pas.agent.proxy.server;
+package io.confluent.pas.agent.proxy.registration;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -7,7 +7,6 @@ import io.confluent.pas.agent.common.utils.JsonUtils;
 import io.confluent.pas.agent.proxy.frameworks.java.models.Key;
 import io.confluent.pas.agent.proxy.frameworks.java.models.Request;
 import io.confluent.pas.agent.proxy.frameworks.java.models.Response;
-import io.confluent.pas.agent.proxy.registration.RequestResponseHandler;
 import io.confluent.pas.agent.proxy.registration.kafka.ConsumerService;
 import io.confluent.pas.agent.proxy.registration.schemas.RegistrationSchemas;
 import lombok.Builder;
@@ -33,7 +32,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 @Slf4j
 @Builder
-public class RequestResponseChannel {
+public class RequestResponseChannel implements AutoCloseable {
 
     /**
      * Interface for processing responses received from the server.
@@ -88,6 +87,12 @@ public class RequestResponseChannel {
 
         // Register handlers for responses and errors immediately upon construction
         registerResponseHandler();
+    }
+
+    @Override
+    public void close() {
+        // Unregister the handlers when the channel is closed
+        requestResponseHandler.unregisterHandler(registration, correlationId);
     }
 
     /**

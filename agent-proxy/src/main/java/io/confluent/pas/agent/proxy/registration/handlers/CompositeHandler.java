@@ -31,13 +31,13 @@ import java.util.function.Supplier;
  * while providing centralized management of the registration lifecycle.
  */
 @Slf4j
-public class CompositeHandler implements RegistrationHandler<RegistrationCoordinator> {
+public class CompositeHandler implements RegistrationHandler {
 
     /**
      * List of managed registration handlers that will be initialized and torn down
      * together
      */
-    private final List<RegistrationHandler<?>> handlers = new ArrayList<>();
+    private final List<RegistrationHandler> handlers = new ArrayList<>();
 
     /**
      * The registration configuration that defines the behavior of this composite
@@ -109,6 +109,10 @@ public class CompositeHandler implements RegistrationHandler<RegistrationCoordin
                     () -> new McpResourceHandler(resourceRegistration, schemas, requestResponseHandler,
                             coordinator.getMcpServer()),
                     "MCP resource handler"));
+            ops.add(registerHandler(
+                    () -> new RestToolHandler(registration, schemas, requestResponseHandler,
+                            coordinator.getRestServer()),
+                    "REST tool handler"));
         } else {
             // For tool registrations, register both MCP and REST tool handlers
             ops.add(registerHandler(
@@ -159,23 +163,21 @@ public class CompositeHandler implements RegistrationHandler<RegistrationCoordin
      * The method is designed to be resilient, preventing failures in one handler
      * from affecting other handler registrations.
      *
-     * @param <T>            The type of server or context the handler is associated
-     *                       with
      * @param handlerFactory A supplier that creates the handler instance
      * @param handlerType    A descriptive name of the handler type for logging
      *                       purposes
      * @return A Mono that completes when the handler is registered
      */
-    private <T> Mono<Void> registerHandler(Supplier<RegistrationHandler<T>> handlerFactory, String handlerType) {
-        RegistrationHandler<T> handler = handlerFactory.get();
+    private Mono<Void> registerHandler(Supplier<RegistrationHandler> handlerFactory, String handlerType) {
+        RegistrationHandler handler = handlerFactory.get();
 
         return handler.initialize()
                 .doOnSuccess(v -> {
                     handlers.add(handler);
                     log.debug("Successfully registered {}", handlerType);
                 })
-                .doOnError(error -> log.error("Failed to register " + handlerType, error))
-                .onErrorResume(error -> Mono.empty()); // Prevent a single handler failure from stopping other
-        // registrations
+                .doOnError(error -> log.error("Failed to register {}", handlerType, error))
+                // Prevent a single handler failure from stopping other registrations
+                .onErrorResume(error -> Mono.empty());
     }
 }

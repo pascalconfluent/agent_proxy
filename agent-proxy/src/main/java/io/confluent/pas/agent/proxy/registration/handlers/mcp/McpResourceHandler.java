@@ -6,21 +6,17 @@ import io.confluent.pas.agent.common.utils.JsonUtils;
 import io.confluent.pas.agent.proxy.registration.RequestResponseHandler;
 import io.confluent.pas.agent.proxy.registration.handlers.AbstractRegistrationHandler;
 import io.confluent.pas.agent.proxy.registration.schemas.RegistrationSchemas;
-import io.confluent.pas.agent.proxy.server.RequestResponseChannel;
 import io.confluent.pas.mcp.common.schemas.BlobResourceResponse;
 import io.confluent.pas.mcp.common.schemas.TextResourceResponse;
 import io.modelcontextprotocol.server.McpAsyncServer;
-import io.modelcontextprotocol.server.McpAsyncServerExchange;
 import io.modelcontextprotocol.server.McpServerFeatures;
 import io.modelcontextprotocol.spec.McpSchema;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
-import reactor.core.publisher.MonoSink;
 
 import javax.naming.OperationNotSupportedException;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 /**
  * Handler for Model Context Protocol (MCP) resource registration and request
@@ -118,35 +114,7 @@ public class McpResourceHandler extends AbstractRegistrationHandler<ResourceRegi
 
         return new McpServerFeatures.AsyncResourceSpecification(
                 resource,
-                (exchange, rcsRequest) -> Mono.create(sink -> sendRequest(exchange, rcsRequest, sink)));
-    }
-
-    /**
-     * Sends a resource request to the appropriate handler and processes the
-     * response.
-     * Generates a unique correlation ID for request tracking.
-     *
-     * @param exchange The MCP server exchange
-     * @param request  The resource request
-     * @param sink     The sink to receive the result
-     */
-    private void sendRequest(McpAsyncServerExchange exchange,
-                             McpSchema.ReadResourceRequest request,
-                             MonoSink<McpSchema.ReadResourceResult> sink) {
-        final String correlationId = UUID.randomUUID().toString();
-        final Map<String, Object> arguments = JsonUtils.toMap(request);
-
-        // Build and send the request through the channel
-        RequestResponseChannel.builder()
-                .correlationId(correlationId)
-                .registration(registration)
-                .requestResponseHandler(requestResponseHandler)
-                .schemas(schemas)
-                .responseProcessor((channel, id, response) -> processResponse(id, response, sink))
-                .build()
-                .sendRequest(arguments)
-                .doOnError(sink::error)
-                .block();
+                (exchange, rcsRequest) -> onRequest(JsonUtils.toMap(rcsRequest)));
     }
 
     /**

@@ -6,20 +6,13 @@ import io.confluent.pas.agent.common.utils.JsonUtils;
 import io.confluent.pas.agent.proxy.registration.RequestResponseHandler;
 import io.confluent.pas.agent.proxy.registration.handlers.AbstractRegistrationHandler;
 import io.confluent.pas.agent.proxy.registration.schemas.RegistrationSchemas;
-import io.confluent.pas.agent.proxy.server.RequestResponseChannel;
 import io.modelcontextprotocol.server.McpAsyncServer;
-import io.modelcontextprotocol.server.McpAsyncServerExchange;
 import io.modelcontextprotocol.server.McpServerFeatures;
 import io.modelcontextprotocol.spec.McpSchema;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
-import reactor.core.publisher.MonoSink;
 
 import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 /**
  * Handler for MCP (Model Context Protocol) tool registration and request
@@ -30,8 +23,6 @@ import java.util.concurrent.Executors;
  */
 @Slf4j
 public class McpToolHandler extends AbstractRegistrationHandler<Registration, McpAsyncServer, McpSchema.CallToolResult> {
-
-    private final ExecutorService executor = Executors.newSingleThreadExecutor();
 
     /**
      * Constructs a new McpToolHandler instance.
@@ -95,13 +86,7 @@ public class McpToolHandler extends AbstractRegistrationHandler<Registration, Mc
     private McpServerFeatures.AsyncToolSpecification createToolSpecification(McpSchema.Tool tool) {
         return new McpServerFeatures.AsyncToolSpecification(
                 tool,
-                (exchange, toolArguments) -> {
-                    return Mono.create(sink -> {
-                        executor.execute(() -> {
-                            sendToolRequest(exchange, toolArguments, sink).block();
-                        });
-                    });
-                });
+                (exchange, toolArguments) -> onRequest(toolArguments));
     }
 
     /**
@@ -115,27 +100,4 @@ public class McpToolHandler extends AbstractRegistrationHandler<Registration, Mc
         return registrationServer.removeTool(registration.getName());
     }
 
-    /**
-     * Sends a tool request to the appropriate handler and processes the response.
-     * Generates a unique correlation ID for request tracking.
-     *
-     * @param exchange  the MCP server exchange
-     * @param arguments the tool arguments
-     * @param sink      the sink to receive the result
-     */
-    private Mono<Integer> sendToolRequest(McpAsyncServerExchange exchange,
-                                          Map<String, Object> arguments,
-                                          MonoSink<McpSchema.CallToolResult> sink) {
-        final String correlationId = UUID.randomUUID().toString();
-
-        return RequestResponseChannel.builder()
-                .correlationId(correlationId)
-                .registration(registration)
-                .requestResponseHandler(requestResponseHandler)
-                .schemas(schemas)
-                .responseProcessor((channel, id, response) -> processResponse(id, response, sink))
-                .build()
-                .sendRequest(arguments)
-                .doOnError(sink::error);
-    }
 }
