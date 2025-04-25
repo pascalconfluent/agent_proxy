@@ -3,7 +3,7 @@ package io.confluent.pas.agent.exemple;
 import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.googleai.GoogleAiGeminiChatModel;
 import dev.langchain4j.service.AiServices;
-import io.confluent.pas.agent.proxy.frameworks.java.Request;
+import io.confluent.pas.agent.proxy.frameworks.java.subscription.SubscriptionRequest;
 import io.confluent.pas.agent.proxy.frameworks.java.spring.annotation.Agent;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -42,24 +42,22 @@ public class AgentInstance {
     /**
      * Handles incoming requests by processing the query and responding with the sentiment analysis result.
      *
-     * @param request The incoming request containing the query.
+     * @param subscriptionRequest The incoming request containing the query.
      */
     @Agent(
             name = "sample_java_agent",
             description = "A sample Java agent that performs sentiment analysis using the Google AI Gemini model.",
-            request_topic = "sample_java_agent_request",
-            response_topic = "sample_java_agent_response",
             requestClass = AgentQuery.class,
             responseClass = AgentResponse.class
     )
-    public void onRequest(Request<AgentQuery, AgentResponse> request) {
-        log.info("Received request: {}", request.getRequest().query());
+    public void onRequest(SubscriptionRequest<AgentQuery, AgentResponse> subscriptionRequest) {
+        log.info("Received request: {}", subscriptionRequest.getRequest().query());
 
         // Process the query using the assistant and get the response
-        final String response = assistant.chat(request.getRequest().query());
+        final String response = assistant.chat(subscriptionRequest.getRequest().query());
 
         // Respond to the request with the sentiment analysis result
-        request.respond(new AgentResponse(response))
+        subscriptionRequest.respond(new AgentResponse(response))
                 .doOnError(e -> log.error("Failed to respond", e))
                 .block();
     }

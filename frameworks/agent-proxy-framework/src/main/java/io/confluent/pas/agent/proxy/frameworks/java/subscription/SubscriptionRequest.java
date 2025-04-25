@@ -1,6 +1,7 @@
-package io.confluent.pas.agent.proxy.frameworks.java;
+package io.confluent.pas.agent.proxy.frameworks.java.subscription;
 
 import io.confluent.pas.agent.proxy.frameworks.java.models.Key;
+import io.confluent.pas.agent.proxy.frameworks.java.models.Response;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -16,22 +17,22 @@ import java.util.function.Consumer;
  */
 @Slf4j
 @AllArgsConstructor
-public class Request<REQ, RES> {
+public class SubscriptionRequest<REQ, RES> {
     @Getter
     private final Key key;
     @Getter
     private final REQ request;
-    private final Consumer<Response<RES>> responseConsumer;
+    private final Consumer<SubscriptionResponse<RES>> responseConsumer;
 
     /**
      * Respond to the request
      *
-     * @param response Response object
+     * @param subscriptionResponse Response object
      */
-    public Mono<Void> respond(Response<RES> response) {
+    public Mono<Void> respond(SubscriptionResponse<RES> subscriptionResponse) {
         return Mono.create(sink -> {
             try {
-                responseConsumer.accept(response);
+                responseConsumer.accept(subscriptionResponse);
                 sink.success();
             } catch (Exception e) {
                 log.error("Error responding to request", e);
@@ -46,6 +47,6 @@ public class Request<REQ, RES> {
      * @param response Response object
      */
     public Mono<Void> respond(RES response) {
-        return this.respond(new Response<>(key, response));
+        return this.respond(new SubscriptionResponse<>(key, response));
     }
 }

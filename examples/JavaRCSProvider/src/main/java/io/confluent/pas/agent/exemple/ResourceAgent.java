@@ -3,7 +3,7 @@ package io.confluent.pas.agent.exemple;
 import io.confluent.pas.agent.common.services.schemas.ResourceRequest;
 import io.confluent.pas.agent.common.services.schemas.TextResourceResponse;
 import io.confluent.pas.agent.common.utils.UriTemplate;
-import io.confluent.pas.agent.proxy.frameworks.java.Request;
+import io.confluent.pas.agent.proxy.frameworks.java.subscription.SubscriptionRequest;
 import io.confluent.pas.agent.proxy.frameworks.java.spring.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -31,7 +31,7 @@ public class ResourceAgent {
     /**
      * Handles incoming requests by processing the query and responding with a message.
      *
-     * @param request The incoming request containing the query.
+     * @param subscriptionRequest The incoming request containing the query.
      */
     @Resource(
             name = "resource-agent--rcs",
@@ -42,15 +42,15 @@ public class ResourceAgent {
             path = URI,
             responseClass = TextResourceResponse.class
     )
-    public void onRequest(Request<ResourceRequest, TextResourceResponse> request) {
-        log.info("Received request: {}", request.getRequest().getUri());
+    public void onRequest(SubscriptionRequest<ResourceRequest, TextResourceResponse> subscriptionRequest) {
+        log.info("Received request: {}", subscriptionRequest.getRequest().getUri());
 
         // Extract values from the URI using the template
-        final Map<String, Object> values = this.template.match(request.getRequest().getUri());
+        final Map<String, Object> values = this.template.match(subscriptionRequest.getRequest().getUri());
 
         // Respond to the request with a message containing the client_id
-        request.respond(new TextResourceResponse(
-                        request.getRequest().getUri(),
+        subscriptionRequest.respond(new TextResourceResponse(
+                        subscriptionRequest.getRequest().getUri(),
                         MIME_TYPE,
                         "{ \"message\": \"Hello, " + values.get("client_id") + "!\" }"
                 ))

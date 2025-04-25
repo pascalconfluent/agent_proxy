@@ -1,10 +1,5 @@
 package io.confluent.pas.agent.common.utils;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.github.victools.jsonschema.generator.OptionPreset;
-import com.github.victools.jsonschema.generator.SchemaGenerator;
-import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
-import com.github.victools.jsonschema.generator.SchemaVersion;
 import io.confluent.kafka.schemaregistry.ParsedSchema;
 import io.confluent.kafka.schemaregistry.annotations.Schema;
 import io.confluent.kafka.schemaregistry.client.SchemaRegistryClient;
@@ -12,6 +7,7 @@ import io.confluent.kafka.schemaregistry.client.rest.entities.SchemaReference;
 import io.confluent.kafka.schemaregistry.client.rest.entities.requests.RegisterSchemaResponse;
 import io.confluent.kafka.schemaregistry.client.rest.exceptions.RestClientException;
 import io.confluent.kafka.schemaregistry.json.JsonSchema;
+import io.confluent.kafka.schemaregistry.json.JsonSchemaProvider;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
@@ -25,9 +21,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class SchemaUtils {
 
-    private final static Lazy<SchemaGenerator> SCHEMA_GENERATOR = new Lazy<>(() -> new SchemaGenerator(new SchemaGeneratorConfigBuilder(
-            SchemaVersion.DRAFT_7,
-            OptionPreset.PLAIN_JSON).build()));
+    private static final JsonSchemaProvider SCHEMA_PROVIDER = new JsonSchemaProvider();
 
     public static void registerSchemaIfMissing(String topicName,
                                                Class<?> clazz,
@@ -83,7 +77,7 @@ public class SchemaUtils {
                                       SchemaRegistryClient schemaRegistryClient) throws IOException, RestClientException {
         final JsonSchema jsonSchema;
         try {
-            jsonSchema = getSchema(clazz, schemaRegistryClient);
+            jsonSchema = getSchema(clazz);
         } catch (IOException e) {
             log.error("Failed to generate schema", e);
             throw e;
@@ -129,24 +123,30 @@ public class SchemaUtils {
     /**
      * Get the schema for a class
      *
-     * @param clazz                Class
-     * @param schemaRegistryClient Schema registry client
+     * @param clazz Class
      * @return JsonSchema
      * @throws IOException If the schema cannot be generated
      */
-    public static JsonSchema getSchema(Class<?> clazz, SchemaRegistryClient schemaRegistryClient) throws IOException {
-        // First use the annotation to generate the schema
-        if (clazz.isAnnotationPresent(Schema.class)) {
-            Schema schema = clazz.getAnnotation(Schema.class);
-            List<SchemaReference> references = Arrays.stream(schema.refs())
-                    .map(ref -> new SchemaReference(ref.name(), ref.subject(), ref.version()))
-                    .collect(Collectors.toList());
-            return (JsonSchema) schemaRegistryClient.parseSchema(JsonSchema.TYPE, schema.value(), references)
-                    .orElseThrow(() -> new IOException("Invalid schema " + schema.value()
-                            + " with refs " + references));
+    public static JsonSchema getSchema(Class<?> clazz) throws IOException {
+        Schema schema = getSchemaAnnotation(clazz);
+        List<SchemaReference> references = Arrays.stream(schema.refs())
+                .map(ref -> new SchemaReference(ref.name(), ref.subject(), ref.version()))
+                .collect(Collectors.toList());
+        return (JsonSchema) SCHEMA_PROVIDER.parseSchema(schema.value(), references, false, false)
+                .orElseThrow(() -> new IOException("Invalid schema " + schema.value()
+                        + " with refs " + references));
+    }
+
+    public static Schema getSchemaAnnotation(Class<?> clazz) {
+        if (!clazz.isAnnotationPresent(Schema.class)) {
+            throw new IllegalArgumentException("Class " + clazz.getName() + " is not annotated with @Schema");
         }
 
-        JsonNode jsonNode = SCHEMA_GENERATOR.get().generateSchema(clazz);
-        return new JsonSchema(jsonNode);
+        final Schema schema = clazz.getAnnotation(Schema.class);
+        if (schema == null) {
+            throw new IllegalArgumentException("Class " + clazz.getName() + " is not annotated with @Schema");
+        }
+
+        return schema;
     }
 }

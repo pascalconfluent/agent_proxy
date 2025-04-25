@@ -14,7 +14,8 @@
     <version>0.0.1-SNAPSHOT</version>
     <name>Confluent Agent Proxy</name>
     <description>This module provides a proxy for Agent protocol framework.
-        It leverages Spring Boot and Spring WebFlux to offer a robust and scalable proxy service for agent communication.
+        It leverages Spring Boot and Spring WebFlux to offer a robust and scalable proxy service for agent
+        communication.
     </description>
     <url/>
     <licenses>
@@ -44,6 +45,7 @@
         <spring-openapi.version>2.8.6</spring-openapi.version>
         <kcache.version>5.2.1</kcache.version>
         <mcp.version>0.9.0</mcp.version>
+        <apache.common.lang3.version>3.17.0</apache.common.lang3.version>
     </properties>
 
     <dependencyManagement>
@@ -59,6 +61,12 @@
     </dependencyManagement>
 
     <dependencies>
+        <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-lang3 -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>${apache.common.lang3.version}</version>
+        </dependency>
 
         <dependency>
             <groupId>org.springframework.boot</groupId>

@@ -10,7 +10,7 @@ handling.
 
 ## Features
 
-- **`@Agent` Annotation**: Simplifies agent registration and request handling.
+- **`@Agent` Annotation**: Simplifies agent registration and subscriptionRequest handling.
 - **`@Resource` Annotation**: Automatically registers resources to the server and handles requests based on URI paths.
 - **Spring Auto-Configuration**: Automatically configures beans based on dependencies and settings.
 - **Kafka Integration**: Manages Kafka consumers and producers efficiently.
@@ -99,10 +99,10 @@ public class AgentInstance {
             requestClass = AgentQuery.class,
             responseClass = AgentResponse.class
     )
-    public void onRequest(Request<Key, AgentQuery, AgentResponse> request) {
-        log.info("Received request: {}", request.getRequest().query());
-        final String response = assistant.chat(request.getRequest().query());
-        request.respond(new AgentResponse(response))
+    public void onRequest(Request<Key, AgentQuery, AgentResponse> subscriptionRequest) {
+        log.info("Received subscriptionRequest: {}", subscriptionRequest.getRequest().query());
+        final String subscriptionResponse = assistant.chat(subscriptionRequest.getRequest().query());
+        subscriptionRequest.respond(new AgentResponse(subscriptionResponse))
                 .doOnError(e -> log.error("Failed to respond", e))
                 .block();
     }
@@ -140,30 +140,30 @@ public class ResourceAgent {
     /**
      * Handles incoming requests by processing the query and responding with a message.
      *
-     * @param request The incoming request containing the query.
+     * @param subscriptionRequest The incoming subscriptionRequest containing the query.
      */
     @Resource(
             name = "resource-agent--rcs",
             description = "This agent returns resources.",
-            request_topic = "resource-request",
-            response_topic = "resource-response",
+            request_topic = "resource-subscriptionRequest",
+            response_topic = "resource-subscriptionResponse",
             contentType = MIME_TYPE,
             path = URI,
             responseClass = Schemas.TextResourceResponse.class
     )
-    public void onRequest(Request<Key, Schemas.ResourceRequest, Schemas.TextResourceResponse> request) {
-        log.info("Received request: {}", request.getRequest().getUri());
+    public void onRequest(Request<Key, Schemas.ResourceRequest, Schemas.TextResourceResponse> subscriptionRequest) {
+        log.info("Received subscriptionRequest: {}", subscriptionRequest.getRequest().getUri());
 
         // Extract values from the URI using the template
-        final Map<String, Object> values = this.template.match(request.getRequest().getUri());
+        final Map<String, Object> values = this.template.match(subscriptionRequest.getRequest().getUri());
 
-        // Respond to the request with a message containing the client_id
-        request.respond(new Schemas.TextResourceResponse(
-                        request.getRequest().getUri(),
+        // Respond to the subscriptionRequest with a message containing the client_id
+        subscriptionRequest.respond(new Schemas.TextResourceResponse(
+                        subscriptionRequest.getRequest().getUri(),
                         MIME_TYPE,
                         "{ \"message\": \"Hello, " + values.get("client_id") + "!\" }"
                 ))
-                .doOnError(e -> log.error("Failed to respond to request", e))
+                .doOnError(e -> log.error("Failed to respond to subscriptionRequest", e))
                 .block();
     }
 }
@@ -190,7 +190,7 @@ public class ResourceAgent {
 
 This framework streamlines the development of **MCP/OpenAPI Agents** in Java by providing:
 
-- **`@Agent` Annotation** for agent registration and request handling.
+- **`@Agent` Annotation** for agent registration and subscriptionRequest handling.
 - **`@Resource` Annotation** for dynamic resource delivery.
 - **Spring Auto-Configuration** to reduce boilerplate code.
 - **Efficient Kafka Integration** for seamless communication.

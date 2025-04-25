@@ -11,6 +11,9 @@ import io.confluent.pas.agent.common.services.schemas.RegistrationKey;
 import io.confluent.pas.agent.proxy.frameworks.java.kafka.TopicManagement;
 import io.confluent.pas.agent.proxy.frameworks.java.kafka.impl.TopicManagementImpl;
 import io.confluent.pas.agent.proxy.frameworks.java.models.Key;
+import io.confluent.pas.agent.proxy.frameworks.java.models.Request;
+import io.confluent.pas.agent.proxy.frameworks.java.models.Response;
+import io.confluent.pas.agent.proxy.frameworks.java.subscription.SubscriptionRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.KafkaStreams;
@@ -52,7 +55,7 @@ public class SubscriptionHandler<REQ, RES> implements Closeable {
      * @param <RES> Response payload type
      */
     public interface RequestHandler<REQ, RES> {
-        void onRequest(Request<REQ, RES> request);
+        void onRequest(SubscriptionRequest<REQ, RES> subscriptionRequest);
     }
 
     private final KafkaConfiguration kafkaConfiguration;
@@ -60,8 +63,8 @@ public class SubscriptionHandler<REQ, RES> implements Closeable {
     private final Class<REQ> requestClass;
     private final Class<RES> responseClass;
     private final Serdes.WrapperSerde<Key> keySerde;
-    private final Serdes.WrapperSerde<REQ> requestSerde;
-    private final Serdes.WrapperSerde<RES> responseSerde;
+    private final Serdes.WrapperSerde<Request> requestSerde;
+    private final Serdes.WrapperSerde<Response> responseSerde;
     private final Supplier<TopicManagement> topicManagementSupplier;
     private final KStreamsSupplier kafkaStreamsSupplier;
     private KafkaStreams kafkaStreams;
@@ -107,8 +110,8 @@ public class SubscriptionHandler<REQ, RES> implements Closeable {
         this.responseClass = responseClass;
         this.registrationService = registrationService;
         this.keySerde = createSerde(Key.class, true);
-        this.requestSerde = createSerde(requestClass, false);
-        this.responseSerde = createSerde(responseClass, false);
+        this.requestSerde = createSerde(Request.class, false);
+        this.responseSerde = createSerde(Response.class, false);
         this.topicManagementSupplier = topicManagementSupplier;
         this.kafkaStreamsSupplier = kafkaStreamsSupplier;
     }
@@ -133,7 +136,7 @@ public class SubscriptionHandler<REQ, RES> implements Closeable {
     }
 
     /**
-     * Subscribes to a registration using explicit JSON 
+     * Subscribes to a registration using explicit JSON
      *
      * @param registration   Registration containing topic and name information
      * @param requestSchema  Schema for request validation
@@ -204,22 +207,29 @@ public class SubscriptionHandler<REQ, RES> implements Closeable {
     private <T, U> void createTopics(Registration registration,
                                      Class<T> requestClass,
                                      Class<U> responseClass) throws Exception {
+
+        final JsonSchema reqSchema = Request.getSchema(requestClass);
+        final JsonSchema resSchema = Response.getSchema(responseClass);
+
         try (TopicManagement topicManagement = topicManagementSupplier.get()) {
-            topicManagement.createTopic(registration.getRequestTopicName(), Key.class, requestClass);
-            topicManagement.createTopic(registration.getResponseTopicName(), Key.class, responseClass);
+            topicManagement.createTopic(registration.getRequestTopicName(), Key.class, reqSchema);
+            topicManagement.createTopic(registration.getResponseTopicName(), Key.class, resSchema);
             log.debug("Created topics for registration: {}", registration.getName());
         }
     }
 
     /**
-     * Creates topics using explicit 
+     * Creates topics using explicit
      */
     private void createTopicsWithSchemas(Registration registration,
                                          JsonSchema requestSchema,
                                          JsonSchema responseSchema) throws Exception {
+        final JsonSchema reqSchema = Request.getSchema(requestSchema);
+        final JsonSchema resSchema = Response.getSchema(responseSchema);
+
         try (TopicManagement topicManagement = topicManagementSupplier.get()) {
-            topicManagement.createTopic(registration.getRequestTopicName(), Key.class, requestSchema);
-            topicManagement.createTopic(registration.getResponseTopicName(), Key.class, responseSchema);
+            topicManagement.createTopic(registration.getRequestTopicName(), Key.class, reqSchema);
+            topicManagement.createTopic(registration.getResponseTopicName(), Key.class, resSchema);
             log.debug("Created topics with schemas for registration: {}", registration.getName());
         }
     }
@@ -255,7 +265,7 @@ public class SubscriptionHandler<REQ, RES> implements Closeable {
         StreamsBuilder builder = new StreamsBuilder();
 
         builder.stream(registration.getRequestTopicName(), Consumed.with(keySerde, requestSerde))
-                .process(new SubscriptionHandlerSupplier<>(handler))
+                .process(new SubscriptionHandlerSupplier<>(handler, requestClass))
                 .to(registration.getResponseTopicName(), Produced.with(keySerde, responseSerde));
 
         final Topology topology = builder.build();

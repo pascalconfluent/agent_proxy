@@ -2,8 +2,7 @@ package io.confluent.pas.agent.proxy.frameworks.client.internal;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import io.confluent.pas.agent.common.utils.JsonUtils;
-import io.confluent.pas.agent.proxy.frameworks.java.Request;
-import io.confluent.pas.agent.proxy.frameworks.java.models.Key;
+import io.confluent.pas.agent.proxy.frameworks.java.subscription.SubscriptionRequest;
 import io.confluent.pas.agent.proxy.frameworks.client.exceptions.AgentException;
 import io.modelcontextprotocol.client.McpAsyncClient;
 import io.modelcontextprotocol.spec.McpSchema;
@@ -49,13 +48,13 @@ public class AgentRequestHandler {
      * Processes incoming mcpTool requests by calling the appropriate MCP mcpTool
      * and handling the response.
      *
-     * @param request The incoming request containing key, generic request data, and JSON payload
+     * @param subscriptionRequest The incoming request containing key, generic request data, and JSON payload
      */
-    public void handleRequest(Request<JsonNode, JsonNode> request) {
-        final Map<String, Object> genericRequest = JsonUtils.toMap(request.getRequest());
+    public void handleRequest(SubscriptionRequest<JsonNode, JsonNode> subscriptionRequest) {
+        final Map<String, Object> genericRequest = JsonUtils.toMap(subscriptionRequest.getRequest());
 
         mcpAsyncClient.callTool(new McpSchema.CallToolRequest(tool.getName(), genericRequest))
-                .flatMap(result -> processToolResponse(result, request))
+                .flatMap(result -> processToolResponse(result, subscriptionRequest))
                 .doOnError(error -> log.error("Error processing request", error))
                 .block();
     }
@@ -64,16 +63,16 @@ public class AgentRequestHandler {
      * Processes the mcpTool's response by converting it to the expected format
      * and sending it back through the request channel.
      *
-     * @param result  The result from the MCP mcpTool call
-     * @param request The original request for context
+     * @param result              The result from the MCP mcpTool call
+     * @param subscriptionRequest The original request for context
      * @return A Mono completing when the response is processed
      * @throws AgentException if response processing fails or unexpected response type is received
      */
-    private Mono<Void> processToolResponse(McpSchema.CallToolResult result, Request<JsonNode, JsonNode> request) {
+    private Mono<Void> processToolResponse(McpSchema.CallToolResult result, SubscriptionRequest<JsonNode, JsonNode> subscriptionRequest) {
         if (!(result.content().getFirst() instanceof McpSchema.TextContent textContent)) {
             return Mono.error(new AgentException("Unexpected response type"));
         }
 
-        return request.respond(deserializer.deserialize(textContent.text()));
+        return subscriptionRequest.respond(deserializer.deserialize(textContent.text()));
     }
 }

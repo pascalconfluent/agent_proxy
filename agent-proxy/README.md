@@ -20,19 +20,19 @@
         - [Tools Schema Definition](#tools-schema-definition)
     - [Configuration Example](#configuration-example)
         - [Resource Schema Definition](#resource-schema-definition)
-    - [Tools Request/Response Schema Definition](#tools-request/response-schema-definition)
-        - [Request/Response Schema](#request/response-schema)
-        - [Request Schema](#request-schema)
-        - [Response Schema](#response-schema)
-    - [Resource Request/Response Schema Definition](#resource-request/response-schema-definition)
+    - [Tools Request/Response Schema Definition](#tools-subscriptionRequest/subscriptionResponse-schema-definition)
+        - [Request/Response Schema](#subscriptionRequest/subscriptionResponse-schema)
+        - [Request Schema](#subscriptionRequest-schema)
+        - [Response Schema](#subscriptionResponse-schema)
+    - [Resource Request/Response Schema Definition](#resource-subscriptionRequest/subscriptionResponse-schema-definition)
         - [Resource Types](#resource-types)
-        - [Request Schema Definition](#request-schema-definition)
-        - [Response Schema Structure](#response-schema-structure)
-            - [Common Response Fields](#common-response-fields)
-            - [Text Resource Response Schema](#text-resource-response-schema)
-            - [Blob Resource Response Schema](#blob-resource-response-schema)
+        - [Request Schema Definition](#subscriptionRequest-schema-definition)
+        - [Response Schema Structure](#subscriptionResponse-schema-structure)
+            - [Common Response Fields](#common-subscriptionResponse-fields)
+            - [Text Resource Response Schema](#text-resource-subscriptionResponse-schema)
+            - [Blob Resource Response Schema](#blob-resource-subscriptionResponse-schema)
         - [Resource Handling Best Practices](#resource-handling-best-practices)
-    - [Correlation ID for Request/Response Handling](#correlation-id-for-request/response-handling)
+    - [Correlation ID for Request/Response Handling](#correlation-id-for-subscriptionRequest/subscriptionResponse-handling)
     - [Running the Proxy](#running-the-proxy)
         - [Prerequisites](#prerequisites)
         - [Installation](#installation)
@@ -54,14 +54,15 @@ well-defined interface.
 - **MCP Protocol Support:** Facilitates tool and resource discovery and execution via **stdio** or **HTTP SSE**.
 - **OpenAPI Integration:** Provides RESTful access to tools and resources with Swagger UI support.
 - **Schema Registry Support:** Ensures consistent data formats through Confluent's Schema Registry.
-- **Correlation ID Tracking:** Supports request tracing across the entire system.
+- **Correlation ID Tracking:** Supports subscriptionRequest tracing across the entire system.
 - **API Endpoints:**
     - Tools: `/api/{tool name}`
     - Resources: `/rcs/{resource uri}`
 
 ## Event-Driven Agent Choreography
 
-The **Agent Proxy** service enables **event-driven agent choreography** by coordinating multiple autonomous agents through
+The **Agent Proxy** service enables **event-driven agent choreography** by coordinating multiple autonomous agents
+through
 event streams in Kafka. Unlike traditional orchestration with a central controller, this model allows agents to make
 independent decisions based on the events they receive.
 
@@ -74,24 +75,26 @@ independent decisions based on the events they receive.
 
 ### Example Workflow
 
-1. **Event Publication:** A client request is converted into an event and published to a Kafka topic.
+1. **Event Publication:** A client subscriptionRequest is converted into an event and published to a Kafka topic.
 2. **Agent Reaction:** Agents subscribed to this topic process the event based on their roles.
-3. **Response Propagation:** Processed results are published to response topics, triggering further actions if needed.
+3. **Response Propagation:** Processed results are published to subscriptionResponse topics, triggering further actions
+   if needed.
 
 ## Communication Models
 
-The **Agent Proxy** service implements two distinct communication patterns for interacting with tools and resources, both
+The **Agent Proxy** service implements two distinct communication patterns for interacting with tools and resources,
+both
 leveraging Kafka as the underlying message transport system.
 
 ### Tool Communication Model
 
-Tools follow a synchronous request-response pattern where:
+Tools follow a synchronous subscriptionRequest-subscriptionResponse pattern where:
 
-1. **Client Request**: Client sends a request message to a specific tool via the proxy
-2. **Topic Routing**: Proxy routes the message to the appropriate tool's request topic in Kafka
-3. **Processing**: Tool consumes the message, processes the request, and generates a response
-4. **Response Publication**: Tool publishes the response to its designated response topic
-5. **Delivery**: Proxy consumes the response from the topic and delivers it back to the client
+1. **Client Request**: Client sends a subscriptionRequest message to a specific tool via the proxy
+2. **Topic Routing**: Proxy routes the message to the appropriate tool's subscriptionRequest topic in Kafka
+3. **Processing**: Tool consumes the message, processes the subscriptionRequest, and generates a subscriptionResponse
+4. **Response Publication**: Tool publishes the subscriptionResponse to its designated subscriptionResponse topic
+5. **Delivery**: Proxy consumes the subscriptionResponse from the topic and delivers it back to the client
 
 This model supports both:
 
@@ -100,9 +103,9 @@ This model supports both:
 
 Key characteristics:
 
-- **Active Processing**: Tools actively perform operations based on the request
+- **Active Processing**: Tools actively perform operations based on the subscriptionRequest
 - **Stateful Operations**: Many tool operations involve complex state changes
-- **Correlation Tracking**: Each request-response pair is linked by a correlation ID
+- **Correlation Tracking**: Each subscriptionRequest-subscriptionResponse pair is linked by a correlation ID
 
 ### Resource Communication Model
 
@@ -307,20 +310,23 @@ Resources can contain either text or binary data.
 
 ### Request/Response Schema
 
-The proxy follows a **schema-first approach**, meaning it relies on Confluent's **Schema Registry** to validate request
-and response messages before exposing them through MCP and OpenAPI. Currently, JSON schemas are used for defining and
+The proxy follows a **schema-first approach**, meaning it relies on Confluent's **Schema Registry** to validate
+subscriptionRequest
+and subscriptionResponse messages before exposing them through MCP and OpenAPI. Currently, JSON schemas are used for
+defining and
 enforcing data structures.
 
 ### Request Schema
 
-Each request follows a structured schema stored in the Schema Registry. A valid request includes a **correlation ID**
+Each subscriptionRequest follows a structured schema stored in the Schema Registry. A valid subscriptionRequest includes
+a **correlation ID**
 for
 tracking and a **payload** containing the requested operation.
 
 ### Response Schema
 
 Responses must also conform to a registered schema, ensuring consistency and validation. The **correlation ID** must
-match the request for proper tracking.
+match the subscriptionRequest for proper tracking.
 
 ## Resource Request/Response Schema Definition
 
@@ -366,7 +372,7 @@ Responses for resources follow a consistent pattern with type-specific variation
 #### Common Response Fields
 
 - **type** (*string*, required): Indicates whether the resource is "text" or "blob"
-- **uri** (*string*, required): The resource identifier that matches the request
+- **uri** (*string*, required): The resource identifier that matches the subscriptionRequest
 - **mimeType** (*string*, required): The MIME type of the resource (e.g., "application/json", "image/png")
 
 #### Text Resource Response Schema

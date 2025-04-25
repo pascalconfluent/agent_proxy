@@ -1,4 +1,4 @@
-package io.confluent.pas.agent.proxy.frameworks.java;
+package io.confluent.pas.agent.proxy.frameworks.java.subscription;
 
 import io.confluent.pas.agent.proxy.frameworks.java.models.Key;
 
@@ -7,5 +7,5 @@ import io.confluent.pas.agent.proxy.frameworks.java.models.Key;
  *
  * @param <RES> Response type
  */
-public record Response<RES>(Key key, RES response) {
+public record SubscriptionResponse<RES>(Key key, RES response) {
 }

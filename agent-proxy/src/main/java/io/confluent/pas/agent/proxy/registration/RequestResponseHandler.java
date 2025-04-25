@@ -54,6 +54,23 @@ public class RequestResponseHandler implements DisposableBean {
         consumerService.addRegistrations(registrations);
     }
 
+    public void registerHandler(Registration registration,
+                                String correlationId,
+                                ConsumerService.ResponseHandler handler,
+                                ConsumerService.ErrorHandler errorHandler) {
+        consumerService.registerResponseHandler(
+                registration,
+                correlationId,
+                handler,
+                errorHandler);
+    }
+
+    public Mono<Void> sendRequest(Registration registration,
+                                  Key key,
+                                  JsonNode request) {
+        return producerService.send(registration.getRequestTopicName(), key, request);
+    }
+
     /**
      * Send a request to a topic and wait for a response
      *
@@ -70,8 +87,6 @@ public class RequestResponseHandler implements DisposableBean {
                                               String correlationId,
                                               Map<String, Object> request)
             throws ExecutionException, InterruptedException {
-        final Key key = new Key(correlationId);
-
         final Observation observation = Observation.start("agent.proxy." + registration.getName(), observationRegistry)
                 .contextualName("sendRequestResponse")
                 .lowCardinalityKeyValue("correlationId", correlationId)
@@ -79,8 +94,7 @@ public class RequestResponseHandler implements DisposableBean {
 
         return Objects.requireNonNull(observation.observe(() -> sendRequestResponse(
                         registration,
-                        correlationId,
-                        key,
+                        new Key(correlationId),
                         schemas.getRequestSchema().envelope(request))))
                 .doOnError(observation::error)
                 .doFinally(signalType -> observation.stop());
@@ -89,14 +103,12 @@ public class RequestResponseHandler implements DisposableBean {
     /**
      * Send a request to a topic and wait for a response
      *
-     * @param registration  the registration
-     * @param correlationId the correlation id
-     * @param key           the key
-     * @param request       the request
+     * @param registration the registration
+     * @param key          the key
+     * @param request      the request
      * @return the response
      */
     public Mono<JsonNode> sendRequestResponse(Registration registration,
-                                              String correlationId,
                                               Key key,
                                               JsonNode request) {
         Sinks.One<JsonNode> sink = Sinks.one();
@@ -104,7 +116,7 @@ public class RequestResponseHandler implements DisposableBean {
         // Register the response handler
         consumerService.registerResponseHandler(
                 registration,
-                correlationId,
+                key.getCorrelationId(),
                 sink::tryEmitValue,
                 sink::tryEmitError);
 

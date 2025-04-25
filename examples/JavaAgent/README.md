@@ -5,8 +5,9 @@
 ## Overview
 
 This sample application demonstrates an agent specialized in sentiment analysis built on the Java Agent
-Framework. It emphasizes the use of the `@Agent` annotation, clearly defining Kafka request/response topics and
-request/response classes for straightforward integration.
+Framework. It emphasizes the use of the `@Agent` annotation, clearly defining Kafka
+subscriptionRequest/subscriptionResponse topics and
+subscriptionRequest/subscriptionResponse classes for straightforward integration.
 
 ## Architecture
 
@@ -133,7 +134,7 @@ shell:> exit
 ## Summary
 
 By clearly defining the agent’s configuration through the `@Agent` annotation, the framework simplifies Kafka
-interactions, enabling efficient sentiment analysis request handling within an MCP/OpenAPI ecosystem.
+interactions, enabling efficient sentiment analysis subscriptionRequest handling within an MCP/OpenAPI ecosystem.
 
 ## Conclusion
 

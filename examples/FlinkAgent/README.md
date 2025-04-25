@@ -123,7 +123,7 @@ To expose the Flink-based sentiment analysis agent to a **client**, register the
 
 ```sql
 INSERT INTO `_agent_registry`
-VALUES ('FlinkAgent', 'This agent returns sentiments of a human request.', 'user_message',
+VALUES ('FlinkAgent', 'This agent returns sentiments of a human subscriptionRequest.', 'user_message',
         'user_sentiment', 'correlationId');
 ```
 
@@ -132,7 +132,8 @@ real-time sentiment analysis in an interoperable manner.
 
 ## Conclusion
 
-This sample demonstrates how a **Flink model or job** can be exposed to other agents or applications via the **Agent Proxy**.
+This sample demonstrates how a **Flink model or job** can be exposed to other agents or applications via the **Agent
+Proxy**.
 By integrating **Agent proxy**, the Flink Sentiment Analysis Agent can seamlessly interact with
 external clients, making it easily accessible for various use cases that require real-time sentiment processing. This
 approach enables interoperability and simplifies the integration of streaming analytics into broader AI workflows.

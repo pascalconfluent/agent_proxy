@@ -7,6 +7,7 @@ import io.confluent.pas.agent.common.services.schemas.ResourceRequest;
 import io.confluent.pas.agent.proxy.frameworks.java.SubscriptionHandler;
 import lombok.Builder;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -205,12 +206,22 @@ public class AgentRegistrar implements InitializingBean, Closeable {
     private InvocationHandler getSubscriptionHandler(Method method, Agent agent, Object bean) {
         log.info("Found agent {} on method {}", agent.name(), method.getName());
 
+        // Define topic names if not provided
+        String resquestTope = agent.request_topic();
+        if (StringUtils.isEmpty(resquestTope)) {
+            resquestTope = agent.name() + "-request";
+        }
+        String responseTopic = agent.response_topic();
+        if (StringUtils.isEmpty(responseTopic)) {
+            responseTopic = agent.name() + "-response";
+        }
+
         // Create registration info for the agent
         final Registration registration = new Registration(
                 agent.name(),
                 agent.description(),
-                agent.request_topic(),
-                agent.response_topic());
+                resquestTope,
+                responseTopic);
 
         // Create and start a subscription handler for the agent
         var subscriptionHandler = subscriptionHandlerSupplier.get(

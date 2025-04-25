@@ -2,7 +2,7 @@ package io.confluent.pas.agent.proxy.rest;
 
 import io.confluent.pas.agent.common.services.schemas.Registration;
 import io.confluent.pas.agent.proxy.registration.RegistrationCoordinator;
-import io.confluent.pas.agent.proxy.registration.RegistrationHandler;
+import io.confluent.pas.agent.proxy.registration.handlers.RegistrationHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;

@@ -9,7 +9,7 @@ import io.confluent.pas.agent.common.services.schemas.ResourceRegistration;
 import io.confluent.pas.agent.common.utils.JsonUtils;
 import io.confluent.pas.agent.common.utils.UriTemplate;
 import io.confluent.pas.agent.proxy.registration.RegistrationCoordinator;
-import io.confluent.pas.agent.proxy.registration.RegistrationHandler;
+import io.confluent.pas.agent.proxy.registration.handlers.CompositeHandler;
 import io.confluent.pas.agent.proxy.registration.schemas.RegistrationSchemas;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
@@ -117,11 +117,11 @@ public class OpenAPIConfiguration {
      *   <li>For resource registrations: Creates GET endpoints with path parameters</li>
      *   <li>For standard registrations: Creates POST endpoints with request/response schemas</li>
      * </ul>
-     * 
+     *
      * @return A map of API path strings to PathItem objects for the OpenAPI specification
      */
     private Map<String, PathItem> buildPathsFromRegistrations() {
-        final List<RegistrationHandler<?, ?>> registrationHandlers = registrationCoordinator
+        final List<CompositeHandler> registrationHandlers = registrationCoordinator
                 .getAllRegistrationHandlers();
         final Map<String, PathItem> pathItems = new HashMap<>();
 
@@ -157,14 +157,14 @@ public class OpenAPIConfiguration {
      * @param pathItems    The path items map to be updated with the new path item
      */
     private void addStandardPathItem(Registration registration,
-            RegistrationSchemas schemas,
-            Map<String, PathItem> pathItems) {
+                                     RegistrationSchemas schemas,
+                                     Map<String, PathItem> pathItems) {
         final String path = registration.getName();
         final PathItem pathItem = new PathItem();
 
         try {
-            final Content requestBody = createRequestBody(schemas.getRequestSchema().getSchema());
-            final ApiResponse response = createApiResponse(schemas.getResponseSchema().getSchema());
+            final Content requestBody = createRequestBody(schemas.getRequestSchema().getPayloadSchema());
+            final ApiResponse response = createApiResponse(schemas.getResponseSchema().getPayloadSchema());
 
             Operation operation = new Operation()
                     .summary(path)
@@ -401,7 +401,7 @@ public class OpenAPIConfiguration {
      * @param property The property definition map containing attributes
      * @param schema   The OpenAPI Schema object to update with these attributes
      */
-    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @SuppressWarnings({"unchecked", "rawtypes"})
     private static void processPropertyAttributes(Map<String, Object> property, Schema<?> schema) {
         // Process format if available
         if (property.containsKey("format")) {
