@@ -12,6 +12,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.io.IOException;
 import java.util.Map;
 
 /**
@@ -65,12 +66,12 @@ public class Request {
      * @return A JsonSchema representing the Request with the specified payload schema
      * @throws JsonProcessingException If there is an error processing the JSON schema
      */
-    public static JsonSchema getSchema(Class<?> payloadClass) throws JsonProcessingException {
-        Schema payloadSchema = SchemaUtils.getSchemaAnnotation(payloadClass);
-        Schema schema = SchemaUtils.getSchemaAnnotation(Request.class);
+    public static JsonSchema getSchema(Class<?> payloadClass) throws IOException {
+        String payloadSchema = SchemaUtils.getSchema(payloadClass);
+        String schema = SchemaUtils.getSchema(Request.class);
 
-        JsonNode schemaNode = JsonUtils.toJsonNode(schema.value());
-        JsonNode payloadNode = JsonUtils.toJsonNode(payloadSchema.value());
+        JsonNode schemaNode = JsonUtils.toJsonNode(schema);
+        JsonNode payloadNode = JsonUtils.toJsonNode(payloadSchema);
 
         // Set the property payload to the payload schema
         ObjectNode propertiesNode = (ObjectNode) schemaNode.get("properties");
@@ -87,9 +88,9 @@ public class Request {
      * @return A JsonSchema representing the Request with the specified payload schema
      * @throws JsonProcessingException If there is an error processing the JSON schema
      */
-    public static JsonSchema getSchema(JsonSchema payloadSchema) throws JsonProcessingException {
-        Schema schema = SchemaUtils.getSchemaAnnotation(Request.class);
-        JsonNode schemaNode = JsonUtils.toJsonNode(schema.value());
+    public static JsonSchema getSchema(JsonSchema payloadSchema) throws IOException {
+        String schema = SchemaUtils.getSchema(Request.class);
+        JsonNode schemaNode = JsonUtils.toJsonNode(schema);
         JsonNode payloadNode = payloadSchema.toJsonNode();
 
         // Set the property payload to the payload schema

@@ -12,6 +12,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.io.IOException;
 import java.util.Map;
 
 /**
@@ -151,14 +152,14 @@ public class Response {
      * @throws JsonProcessingException  If there's an error processing the JSON schema
      * @throws IllegalArgumentException If the payload class is not properly annotated
      */
-    public static JsonSchema getSchema(Class<?> payloadClass) throws JsonProcessingException {
+    public static JsonSchema getSchema(Class<?> payloadClass) throws IOException {
         // Extract schema annotations from the payload class and Response class
-        Schema payloadSchema = SchemaUtils.getSchemaAnnotation(payloadClass);
-        Schema schema = SchemaUtils.getSchemaAnnotation(Response.class);
+        String payloadSchema = SchemaUtils.getSchema(payloadClass);
+        String schema = SchemaUtils.getSchema(Response.class);
 
         // Convert both schemas to JsonNode objects for manipulation
-        JsonNode schemaNode = JsonUtils.toJsonNode(schema.value());
-        JsonNode payloadNode = JsonUtils.toJsonNode(payloadSchema.value());
+        JsonNode schemaNode = JsonUtils.toJsonNode(schema);
+        JsonNode payloadNode = JsonUtils.toJsonNode(payloadSchema);
 
         // Set the property payload to the payload schema
         ObjectNode propertiesNode = (ObjectNode) schemaNode.get("properties");
@@ -178,12 +179,12 @@ public class Response {
      * @return A JsonSchema object representing the combined schema
      * @throws JsonProcessingException If there's an error processing the JSON schema
      */
-    public static JsonSchema getSchema(JsonSchema payloadSchema) throws JsonProcessingException {
+    public static JsonSchema getSchema(JsonSchema payloadSchema) throws IOException {
         // Extract schema annotation from the Response class
-        Schema schema = SchemaUtils.getSchemaAnnotation(Response.class);
+        String schema = SchemaUtils.getSchema(Response.class);
 
         // Convert both schemas to JsonNode objects for manipulation
-        JsonNode schemaNode = JsonUtils.toJsonNode(schema.value());
+        JsonNode schemaNode = JsonUtils.toJsonNode(schema);
         JsonNode payloadNode = payloadSchema.toJsonNode();
 
         // Set the property payload to the payload schema
