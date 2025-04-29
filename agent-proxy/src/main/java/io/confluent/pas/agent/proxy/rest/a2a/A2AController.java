@@ -9,9 +9,10 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@RestController
+//@RestController
 @Tag(name = "A2A", description = "Google A2A compliant API")
-public class A2ARestController {
+public class A2AController {
+    private final static String AGENT_PATH = "/a2a/";
 
     public record Link(String href) {
     }
@@ -24,11 +25,11 @@ public class A2ARestController {
 
     private final A2AAsyncServer a2aAsyncServer;
 
-    public A2ARestController(A2AAsyncServer a2aAsyncServer) {
+    public A2AController(A2AAsyncServer a2aAsyncServer) {
         this.a2aAsyncServer = a2aAsyncServer;
     }
 
-    @GetMapping("/a2a")
+    @GetMapping(AGENT_PATH)
     public List<A2ARegistration> getA2ARegistration() {
         return a2aAsyncServer.getRegistrations()
                 .stream()
@@ -36,9 +37,9 @@ public class A2ARestController {
                         registration -> new A2ARegistration(
                                 registration,
                                 new Links[]{new Links(
-                                        new Link("/a2a/" + registration.getName()),
-                                        new Link("/a2a"),
-                                        new Link("/a2a/" + registration.getName() + "/.well-known/agent.json"))}
+                                        new Link(AGENT_PATH + registration.getName()),
+                                        new Link(AGENT_PATH),
+                                        new Link(AGENT_PATH + registration.getName() + "/.well-known/agent.json"))}
                         ))
                 .toList();
     }
@@ -53,8 +54,8 @@ public class A2ARestController {
         return ResponseEntity.ok(agentCard);
     }
 
-    @PostMapping("/a2a/{agent-name}")
-    public ResponseEntity<String> processRequest(@PathVariable("agent-name") String agentName, @RequestBody Task task) {
-        return ResponseEntity.ok("Hello from " + agentName);
+    @PostMapping(AGENT_PATH + "{agent-name}")
+    public ResponseEntity<Task> processRequest(@PathVariable("agent-name") String agentName, @RequestBody Task task) {
+        return ResponseEntity.ok(task);
     }
 }

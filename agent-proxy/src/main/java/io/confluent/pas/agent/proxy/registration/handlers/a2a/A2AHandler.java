@@ -28,7 +28,7 @@ public class A2AHandler extends AbstractRegistrationHandler<Registration, A2AAsy
 
     @Override
     public Mono<Void> teardown() {
-        return null;
+        return Mono.empty();
     }
 
 }
