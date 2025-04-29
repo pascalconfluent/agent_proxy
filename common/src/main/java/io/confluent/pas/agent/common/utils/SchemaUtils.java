@@ -40,9 +40,9 @@ public class SchemaUtils {
      * @param schemaRegistryClient Schema registry client instance
      */
     public static void registerSchemaIfMissing(String topicName,
-            Class<?> clazz,
-            boolean forKey,
-            SchemaRegistryClient schemaRegistryClient) {
+                                               Class<?> clazz,
+                                               boolean forKey,
+                                               SchemaRegistryClient schemaRegistryClient) {
         try {
             if (!isSchemaRegistered(topicName, forKey, schemaRegistryClient)) {
                 registerSchema(topicName, clazz, forKey, schemaRegistryClient);
@@ -65,8 +65,8 @@ public class SchemaUtils {
      * @throws RestClientException If the Schema Registry returns an error
      */
     public static boolean isSchemaRegistered(String topicName,
-            boolean forKey,
-            SchemaRegistryClient schemaRegistryClient) throws IOException, RestClientException {
+                                             boolean forKey,
+                                             SchemaRegistryClient schemaRegistryClient) throws IOException, RestClientException {
         final String subject = topicName + (forKey ? "-key" : "-value");
         try {
             return schemaRegistryClient.getLatestSchemaMetadata(subject) != null;
@@ -91,9 +91,9 @@ public class SchemaUtils {
      * @throws RestClientException If schema registration fails
      */
     public static void registerSchema(String topicName,
-            Class<?> clazz,
-            boolean forKey,
-            SchemaRegistryClient schemaRegistryClient) throws IOException, RestClientException {
+                                      Class<?> clazz,
+                                      boolean forKey,
+                                      SchemaRegistryClient schemaRegistryClient) throws IOException, RestClientException {
         final JsonSchema jsonSchema;
         try {
             jsonSchema = getJsonSchema(clazz);
@@ -118,9 +118,9 @@ public class SchemaUtils {
      * @throws RestClientException If schema registration fails
      */
     public static void registerSchema(String topicName,
-            JsonSchema jsonSchema,
-            boolean forKey,
-            SchemaRegistryClient schemaRegistryClient) throws IOException, RestClientException {
+                                      JsonSchema jsonSchema,
+                                      boolean forKey,
+                                      SchemaRegistryClient schemaRegistryClient) throws IOException, RestClientException {
         // Then register the schema
         try {
             final String subject = topicName + (forKey ? "-key" : "-value");
@@ -159,8 +159,8 @@ public class SchemaUtils {
         List<SchemaReference> references = (schemaAnnotation == null)
                 ? new ArrayList<>()
                 : Arrays.stream(schemaAnnotation.refs())
-                        .map(ref -> new SchemaReference(ref.name(), ref.subject(), ref.version()))
-                        .collect(Collectors.toList());
+                .map(ref -> new SchemaReference(ref.name(), ref.subject(), ref.version()))
+                .collect(Collectors.toList());
 
         return (JsonSchema) SCHEMA_PROVIDER.parseSchema(schema, references, false, false)
                 .orElseThrow(() -> new IOException("Invalid schema " + schema
@@ -174,9 +174,8 @@ public class SchemaUtils {
      *
      * @param clazz Class to get schema for
      * @return Schema as String
-     * @throws IOException If schema generation fails
      */
-    public static String getSchema(Class<?> clazz) throws IOException {
+    public static String getSchema(Class<?> clazz) {
         Schema schema = getSchemaAnnotation(clazz);
         if (schema == null) {
             return generateSchemaFromClass(clazz);
@@ -205,9 +204,8 @@ public class SchemaUtils {
      *
      * @param clazz Class to generate schema from
      * @return JSON schema as String
-     * @throws IOException If schema generation fails
      */
-    private static String generateSchemaFromClass(Class<?> clazz) throws IOException {
+    private static String generateSchemaFromClass(Class<?> clazz) {
         SchemaGeneratorConfigBuilder configBuilder = new SchemaGeneratorConfigBuilder(SchemaVersion.DRAFT_2020_12);
         SchemaGenerator generator = new SchemaGenerator(configBuilder.build());
 
