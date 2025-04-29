@@ -63,7 +63,7 @@ public class UriUtils {
     public static List<String> extractUrlParts(String path) {
         return Stream.of(path.split("/"))
                 .filter(StringUtils::isNotEmpty)
-                .skip(1) // Skip the initial part which is empty
+                .filter(part -> !part.equalsIgnoreCase("agents"))
                 .toList();
     }
 }

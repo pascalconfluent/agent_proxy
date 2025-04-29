@@ -10,7 +10,8 @@ import io.confluent.pas.agent.common.services.schemas.RegistrationKey;
 import io.confluent.pas.agent.proxy.registration.events.DeletedRegistrationEvent;
 import io.confluent.pas.agent.proxy.registration.events.NewRegistrationEvent;
 import io.confluent.pas.agent.proxy.registration.handlers.CompositeHandler;
-import io.confluent.pas.agent.proxy.rest.RestAsyncServer;
+import io.confluent.pas.agent.proxy.rest.a2a.A2AAsyncServer;
+import io.confluent.pas.agent.proxy.rest.agents.AgentAsyncServer;
 import io.modelcontextprotocol.server.McpAsyncServer;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -46,11 +47,14 @@ public class RegistrationCoordinator implements DisposableBean {
     @Getter
     private final McpAsyncServer mcpServer;
 
+    @Getter
+    private final A2AAsyncServer a2AAsyncServer;
+
     /**
      * REST server for handling HTTP/REST communications
      */
     @Getter
-    private final RestAsyncServer restServer;
+    private final AgentAsyncServer restServer;
 
     /**
      * Handler for processing request/response pairs
@@ -95,7 +99,8 @@ public class RegistrationCoordinator implements DisposableBean {
     public RegistrationCoordinator(KafkaConfiguration kafkaConfiguration,
                                    RequestResponseHandler requestResponseHandler,
                                    McpAsyncServer mcpServer,
-                                   RestAsyncServer restServer,
+                                   AgentAsyncServer restServer,
+                                   A2AAsyncServer a2aAsyncServer,
                                    ApplicationEventPublisher applicationEventPublisher) {
         // Create a registration handler that will forward registration events to our
         // onRegistration method
@@ -109,6 +114,7 @@ public class RegistrationCoordinator implements DisposableBean {
         this.requestResponseHandler = requestResponseHandler;
         this.mcpServer = mcpServer;
         this.restServer = restServer;
+        this.a2AAsyncServer = a2aAsyncServer;
         this.schemaRegistryClient = KafkaPropertiesFactory.getSchemRegistryClient(kafkaConfiguration);
         this.applicationEventPublisher = applicationEventPublisher;
         this.registrationService = new RegistrationService<>(
@@ -133,13 +139,15 @@ public class RegistrationCoordinator implements DisposableBean {
      */
     public RegistrationCoordinator(RequestResponseHandler requestResponseHandler,
                                    McpAsyncServer mcpServer,
-                                   RestAsyncServer restServer,
+                                   AgentAsyncServer restServer,
+                                   A2AAsyncServer a2aAsyncServer,
                                    SchemaRegistryClient schemaRegistryClient,
                                    RegistrationService<RegistrationKey, Registration> registrationService,
                                    ApplicationEventPublisher applicationEventPublisher) {
         this.requestResponseHandler = requestResponseHandler;
         this.mcpServer = mcpServer;
         this.restServer = restServer;
+        this.a2AAsyncServer = a2aAsyncServer;
         this.schemaRegistryClient = schemaRegistryClient;
         this.registrationService = registrationService;
         this.applicationEventPublisher = applicationEventPublisher;

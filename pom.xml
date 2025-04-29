@@ -58,7 +58,6 @@
         <module>./examples/JavaAgent</module>
         <module>./examples/JavaRCSProvider</module>
         <module>shell</module>
-        <module>a2a</module>
     </modules>
 
     <repositories>

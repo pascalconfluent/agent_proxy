@@ -6,9 +6,10 @@ import io.confluent.pas.agent.common.services.schemas.Registration;
 import io.confluent.pas.agent.common.services.schemas.ResourceRegistration;
 import io.confluent.pas.agent.proxy.registration.RegistrationCoordinator;
 import io.confluent.pas.agent.proxy.registration.RequestResponseHandler;
+import io.confluent.pas.agent.proxy.registration.handlers.a2a.A2AHandler;
 import io.confluent.pas.agent.proxy.registration.handlers.mcp.McpResourceHandler;
 import io.confluent.pas.agent.proxy.registration.handlers.mcp.McpToolHandler;
-import io.confluent.pas.agent.proxy.registration.handlers.rest.RestToolHandler;
+import io.confluent.pas.agent.proxy.registration.handlers.rest.RestHandler;
 import io.confluent.pas.agent.proxy.registration.schemas.RegistrationSchemas;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -110,19 +111,29 @@ public class CompositeHandler implements RegistrationHandler {
                             coordinator.getMcpServer()),
                     "MCP resource handler"));
             ops.add(registerHandler(
-                    () -> new RestToolHandler(registration, schemas, requestResponseHandler,
+                    () -> new RestHandler(registration, schemas, requestResponseHandler,
                             coordinator.getRestServer()),
-                    "REST tool handler"));
+                    "REST handler"));
+            ops.add(registerHandler(
+                    () -> new A2AHandler(registration, schemas, requestResponseHandler,
+                            coordinator.getA2AAsyncServer()),
+                    "A2A handler"));
         } else {
             // For tool registrations, register both MCP and REST tool handlers
             ops.add(registerHandler(
-                    () -> new McpToolHandler(registration, schemas, requestResponseHandler, coordinator.getMcpServer()),
+                    () -> new McpToolHandler(registration, schemas, requestResponseHandler,
+                            coordinator.getMcpServer()),
                     "MCP tool handler"));
 
             ops.add(registerHandler(
-                    () -> new RestToolHandler(registration, schemas, requestResponseHandler,
+                    () -> new RestHandler(registration, schemas, requestResponseHandler,
                             coordinator.getRestServer()),
-                    "REST tool handler"));
+                    "REST handler"));
+
+            ops.add(registerHandler(
+                    () -> new A2AHandler(registration, schemas, requestResponseHandler,
+                            coordinator.getA2AAsyncServer()),
+                    "A2A handler"));
         }
 
         return Mono.when(ops);

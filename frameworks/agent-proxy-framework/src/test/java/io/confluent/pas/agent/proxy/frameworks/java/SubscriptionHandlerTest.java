@@ -70,8 +70,7 @@ public class SubscriptionHandlerTest {
                         "Name",
                         "Description",
                         "requestTopic",
-                        "responseTopic",
-                        "corrleationId"
+                        "responseTopic"
                 ),
                 (request) -> {
                     request.respond(new Response(request.getRequest().a() + request.getRequest().b()))
@@ -96,8 +95,7 @@ public class SubscriptionHandlerTest {
                         "Name",
                         "Description",
                         "requestTopic",
-                        "responseTopic",
-                        "corrleationId"
+                        "responseTopic"
                 ),
                 new JsonSchema(reqSchema),
                 new JsonSchema(resSchema),

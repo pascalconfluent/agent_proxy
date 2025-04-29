@@ -107,7 +107,7 @@ public class ResourceRegistration extends Registration {
                                 String responseTopicName,
                                 String mimeType,
                                 String url) {
-        super(RESOURCE, name, description, requestTopicName, responseTopicName);
+        super(RESOURCE, name, description, requestTopicName, responseTopicName, "N/A");
         this.mimeType = mimeType;
         setUrl(url);
     }
