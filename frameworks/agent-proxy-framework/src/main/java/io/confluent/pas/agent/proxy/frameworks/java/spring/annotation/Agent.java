@@ -27,19 +27,12 @@ public @interface Agent {
     /**
      * The Kafka topic name where requests will be received.
      */
-    String request_topic();
+    String request_topic() default "";
 
     /**
      * The Kafka topic name where responses will be sent.
      */
-    String response_topic();
-    
-    /**
-     * The class type for the Kafka message key.
-     * Must extend the Key class.
-     * Defaults to Key.class.
-     */
-    Class<? extends Key> keyClass() default Key.class;
+    String response_topic() default "";
 
     /**
      * The class type for the request message payload.

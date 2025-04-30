@@ -3,9 +3,9 @@ package io.confluent.pas.agent.proxy;
 import io.confluent.pas.agent.common.services.KafkaConfiguration;
 import io.confluent.pas.agent.common.services.schemas.Registration;
 import io.confluent.pas.agent.proxy.frameworks.java.SubscriptionHandler;
-import io.confluent.pas.agent.proxy.frameworks.java.models.Key;
 import io.confluent.pas.agent.proxy.registration.RegistrationCoordinator;
-import io.confluent.pas.agent.proxy.registration.RegistrationHandler;
+import io.confluent.pas.agent.proxy.registration.handlers.CompositeHandler;
+import io.confluent.pas.agent.proxy.registration.handlers.RegistrationHandler;
 import io.confluent.pas.agent.proxy.registration.RequestResponseHandler;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,26 +46,22 @@ public class TestProxyIT {
     private final KafkaConfiguration kafkaConfiguration;
     private final RegistrationCoordinator coordinator;
     private final ProxyEventListener listener;
-    private final RequestResponseHandler requestResponseHandler;
 
     @Autowired
     public TestProxyIT(KafkaConfiguration kafkaConfiguration,
                        RegistrationCoordinator coordinator,
-                       ProxyEventListener listener,
-                       RequestResponseHandler requestResponseHandler) {
+                       ProxyEventListener listener) {
         this.kafkaConfiguration = kafkaConfiguration;
         this.coordinator = coordinator;
         this.listener = listener;
-        this.requestResponseHandler = requestResponseHandler;
     }
 
     @Test
     public void testToolRegistration() throws InterruptedException {
         listener.reset();
 
-        final SubscriptionHandler<Key, String, String> handler = new SubscriptionHandler<>(
+        final SubscriptionHandler<String, String> handler = new SubscriptionHandler<>(
                 kafkaConfiguration,
-                Key.class,
                 String.class,
                 String.class);
 
@@ -81,7 +77,7 @@ public class TestProxyIT {
 
         listener.waitForEvent();
 
-        final List<RegistrationHandler<?, ?>> handlers = coordinator.getAllRegistrationHandlers();
+        final List<CompositeHandler> handlers = coordinator.getAllRegistrationHandlers();
         assertThat(handlers).isNotNull();
         assertThat(handlers.size()).isEqualTo(1);
     }

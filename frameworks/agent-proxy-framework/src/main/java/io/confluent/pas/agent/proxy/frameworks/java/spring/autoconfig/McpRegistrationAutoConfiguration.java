@@ -47,12 +47,6 @@ public class McpRegistrationAutoConfiguration {
     private String responseTopic;
 
     /**
-     * Field name for request-response correlation, defaults to standard name
-     */
-    @Value("${agent.correlation-id:" + CORRELATION_ID_FIELD_NAME + "}")
-    private String correlationIdFieldName;
-
-    /**
      * Creates a Registration bean with the agent's configuration.
      * Contains all necessary information for registering the agent in MCP.
      *
@@ -66,7 +60,6 @@ public class McpRegistrationAutoConfiguration {
                 .description(agentDescription)
                 .requestTopicName(requestTopic)
                 .responseTopicName(responseTopic)
-                .correlationIdFieldName(correlationIdFieldName)
                 .build();
     }
 }

@@ -5,9 +5,11 @@ import io.confluent.pas.agent.common.services.schemas.Registration;
 import io.confluent.pas.agent.common.services.schemas.ResourceRegistration;
 import io.confluent.pas.agent.common.services.schemas.ResourceRequest;
 import io.confluent.pas.agent.proxy.frameworks.java.SubscriptionHandler;
-import io.confluent.pas.agent.proxy.frameworks.java.models.Key;
+import io.confluent.pas.agent.proxy.frameworks.java.spring.annotation.exceptions.AgentInitializationException;
+import io.confluent.pas.agent.proxy.frameworks.java.spring.annotation.exceptions.AgentInvocationException;
 import lombok.Builder;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,9 +39,7 @@ public class AgentRegistrar implements InitializingBean, Closeable {
      * Supplier for creating SubscriptionHandlers
      */
     public interface SubscriptionHandlerSupplier {
-        SubscriptionHandler<? extends Key, ?, ?> get(Class<? extends Key> keyClass,
-                                                     Class<?> requestClass,
-                                                     Class<?> responseClass);
+        SubscriptionHandler<?, ?> get(Class<?> requestClass, Class<?> responseClass);
     }
 
     /**
@@ -51,7 +51,7 @@ public class AgentRegistrar implements InitializingBean, Closeable {
      */
     @Builder
     record InvocationHandler(MethodHandle method,
-                             SubscriptionHandler<?, ?, ?> subscriptionHandler) implements Closeable {
+                             SubscriptionHandler<?, ?> subscriptionHandler) implements Closeable {
 
         /**
          * Subscribes the handler to the specified registration.
@@ -107,8 +107,8 @@ public class AgentRegistrar implements InitializingBean, Closeable {
     public AgentRegistrar(KafkaConfiguration kafkaConfiguration,
                           ApplicationContext applicationContext) {
         this(applicationContext,
-                (keyClass, requestClass, responseClass) ->
-                        new SubscriptionHandler<>(kafkaConfiguration, keyClass, requestClass, responseClass)
+                (requestClass, responseClass) ->
+                        new SubscriptionHandler<>(kafkaConfiguration, requestClass, responseClass)
         );
 
     }
@@ -143,6 +143,11 @@ public class AgentRegistrar implements InitializingBean, Closeable {
                         // If the method is annotated with @Agent, handle it accordingly
                         if (method.isAnnotationPresent(Agent.class)) {
                             final Agent agent = method.getAnnotation(Agent.class);
+                            if (agent == null) {
+                                log.error("Failed to find @Agent annotation on method {}", method.getName());
+                                throw new AgentInitializationException("Failed to find @Agent annotation");
+                            }
+
                             final InvocationHandler info = getSubscriptionHandler(method, agent, bean);
                             // Track the handler for cleanup
                             addHandler(info);
@@ -150,6 +155,11 @@ public class AgentRegistrar implements InitializingBean, Closeable {
                         // If the method is annotated with @Resource, handle it accordingly
                         else if (method.isAnnotationPresent(Resource.class)) {
                             final Resource resource = method.getAnnotation(Resource.class);
+                            if (resource == null) {
+                                log.error("Failed to find @Resource annotation on method {}", method.getName());
+                                throw new AgentInitializationException("Failed to find @Resource annotation");
+                            }
+
                             final InvocationHandler info = getSubscriptionHandler(method, resource, bean);
                             // Track the handler for cleanup
                             addHandler(info);
@@ -179,18 +189,20 @@ public class AgentRegistrar implements InitializingBean, Closeable {
     private InvocationHandler getSubscriptionHandler(Method method, Resource resource, Object bean) {
         log.info("Found resource {} on method {}", resource.name(), method.getName());
 
+        String requestTopic = getTopicName(resource.name(), resource.request_topic(), "-request");
+        String responseTopic = getTopicName(resource.name(), resource.response_topic(), "-response");
+
         // Create registration info for the resource
         final ResourceRegistration registration = new ResourceRegistration(
                 resource.name(),
                 resource.description(),
-                resource.request_topic(),
-                resource.response_topic(),
+                requestTopic,
+                responseTopic,
                 resource.contentType(),
                 resource.path());
 
         // Create and start a subscription handler for the resource
-        var subscriptionHandler = subscriptionHandlerSupplier.get(
-                resource.keyClass(),
+        SubscriptionHandler<?, ?> subscriptionHandler = subscriptionHandlerSupplier.get(
                 ResourceRequest.class,
                 resource.responseClass());
 
@@ -209,16 +221,19 @@ public class AgentRegistrar implements InitializingBean, Closeable {
     private InvocationHandler getSubscriptionHandler(Method method, Agent agent, Object bean) {
         log.info("Found agent {} on method {}", agent.name(), method.getName());
 
+        // Define topic names if not provided
+        String requestTopic = getTopicName(agent.name(), agent.request_topic(), "-request");
+        String responseTopic = getTopicName(agent.name(), agent.response_topic(), "-response");
+
         // Create registration info for the agent
         final Registration registration = new Registration(
                 agent.name(),
                 agent.description(),
-                agent.request_topic(),
-                agent.response_topic());
+                requestTopic,
+                responseTopic);
 
         // Create and start a subscription handler for the agent
-        var subscriptionHandler = subscriptionHandlerSupplier.get(
-                agent.keyClass(),
+        SubscriptionHandler<?, ?> subscriptionHandler = subscriptionHandlerSupplier.get(
                 agent.requestClass(),
                 agent.responseClass());
 
@@ -235,7 +250,7 @@ public class AgentRegistrar implements InitializingBean, Closeable {
      * @return Invocation handler for the method
      */
     @NotNull
-    private InvocationHandler getInvocationHandler(Method method, Object bean, Registration registration, SubscriptionHandler<?, ?, ?> subscriptionHandler) {
+    private InvocationHandler getInvocationHandler(Method method, Object bean, Registration registration, SubscriptionHandler<?, ?> subscriptionHandler) {
         try {
             // Create a MethodHandle for the method to allow dynamic invocation
             MethodHandles.Lookup lookup = MethodHandles.lookup();
@@ -251,6 +266,22 @@ public class AgentRegistrar implements InitializingBean, Closeable {
             log.error("Failed to create MethodHandle for method {}", method.getName(), e);
             throw new AgentInvocationException("Failed to create MethodHandle", e);
         }
+    }
+
+    /**
+     * Generates a topic name based on the provided name, topic, and suffix.
+     * If the topic is empty, it appends the suffix to the name.
+     *
+     * @param name   The base name
+     * @param topic  The topic name
+     * @param suffix The suffix to append if the topic is empty
+     * @return The generated topic name
+     */
+    private static String getTopicName(String name, String topic, String suffix) {
+        if (StringUtils.isEmpty(topic)) {
+            return name + suffix;
+        }
+        return topic;
     }
 
     /**

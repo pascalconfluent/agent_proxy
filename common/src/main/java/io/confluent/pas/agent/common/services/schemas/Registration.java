@@ -6,73 +6,85 @@ import lombok.*;
 import org.apache.commons.lang3.StringUtils;
 
 @Schema(value = """
-            {
-               "properties":{
-                  "registrationType":{
-                     "connect.index":5,
-                     "type":"string"
-                  },
-                  "correlationIdFieldName":{
-                     "connect.index":4,
-                     "oneOf":[
-                        {
-                           "type":"null"
-                        },
-                        {
-                           "type":"string"
-                        }
-                     ]
-                  },
-                  "description":{
-                     "connect.index":1,
-                     "type":"string"
-                  },
-                  "name":{
-                     "connect.index":0,
-                     "type":"string"
-                  },
-                  "requestTopicName":{
-                     "connect.index":2,
-                      "type":"string"
-                  },
-                  "responseTopicName":{
-                     "connect.index":3,
-                     "type":"string"
-                  },
-                  "mimeType":{
-                     "connect.index":6,
-                     "oneOf":[
-                        {
-                           "type":"null"
-                        },
-                        {
-                           "type":"string"
-                        }
-                     ]
-                  },
-                  "url":{
-                     "connect.index":7,
-                     "oneOf":[
-                        {
-                           "type":"null"
-                        },
-                        {
-                           "type":"string"
-                        }
-                     ]
-                  }
-               },
-               "required":[
-                  "name",
-                  "description",
-                  "registrationType",
-                  "requestTopicName",
-                  "responseTopicName"
-               ],
-               "additionalProperties":false,
-               "title":"Record",
-               "type":"object"
-            }""", refs = {})
+        {
+           "properties":{
+              "registrationType":{
+                 "connect.index":5,
+                 "type":"string"
+              },
+              "correlationIdFieldName":{
+                 "connect.index":4,
+                 "oneOf":[
+                    {
+                       "type":"null"
+                    },
+                    {
+                       "type":"string"
+                    }
+                 ]
+              },
+              "description":{
+                 "connect.index":1,
+                 "type":"string"
+              },
+              "name":{
+                 "connect.index":0,
+                 "type":"string"
+              },
+              "requestTopicName":{
+                 "connect.index":2,
+                  "type":"string"
+              },
+              "responseTopicName":{
+                 "connect.index":3,
+                 "type":"string"
+              },
+              "mimeType":{
+                 "connect.index":6,
+                 "oneOf":[
+                    {
+                       "type":"null"
+                    },
+                    {
+                       "type":"string"
+                    }
+                 ]
+              },
+              "url":{
+                 "connect.index":7,
+                 "oneOf":[
+                    {
+                       "type":"null"
+                    },
+                    {
+                       "type":"string"
+                    }
+                 ]
+          },
+          "version":{
+             "connect.index":8,
+             "oneOf":[
+                {
+                   "type":"null"
+                },
+                {
+                   "type":"string"
+                }
+             ],
+             "default":"N/A"
+          }
+           },
+           "required":[
+              "name",
+              "description",
+              "registrationType",
+              "requestTopicName",
+              "responseTopicName"
+           ],
+           "additionalProperties":false,
+           "title":"Record",
+           "type":"object"
+        }""", refs = {})
 @Getter
 @Setter
 @NoArgsConstructor
@@ -98,15 +110,11 @@ public class Registration {
     private String requestTopicName;
     @JsonProperty(value = "responseTopicName", required = true)
     private String responseTopicName;
-    @JsonProperty(value = "correlationIdFieldName", defaultValue = CORRELATION_ID_FIELD_NAME)
-    private String correlationIdFieldName;
+    @JsonProperty(value = "version", defaultValue = "N/A")
+    private String version;
 
     public Registration(String name, String description, String requestTopicName, String responseTopicName) {
-        this(TOOL, name, description, requestTopicName, responseTopicName, CORRELATION_ID_FIELD_NAME);
-    }
-
-    public Registration(String name, String description, String requestTopicName, String responseTopicName, String correlationIdFieldName) {
-        this(TOOL, name, description, requestTopicName, responseTopicName, correlationIdFieldName);
+        this(TOOL, name, description, requestTopicName, responseTopicName, "N/A");
     }
 
     @JsonIgnore
