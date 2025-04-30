@@ -9,8 +9,10 @@ architecture. The project consists of two main modules:
    Confluent Cloud topics.
 2. **[Shell Module](shell/README.md)** – Enables interaction with MCP services and Large Language Models (LLMs) such
    as OpenAI, Gemini, and AWS Bedrock.
-3. **[Agentic Choreography Framework](frameworks/agent-proxy-framework/README.md)** – A Java framework designed to accelerate the development of agents by taking care
-   of infrastructure tasks like topic creation, schema registration, agent registration, and request/response handling.
+3. **[Agentic Choreography Framework](frameworks/agent-proxy-framework/README.md)** – A Java framework designed to
+   accelerate the development of agents by taking care
+   of infrastructure tasks like topic creation, schema registration, agent registration, and
+   subscriptionRequest/subscriptionResponse handling.
    For more details, see the [Agentic Choreography Framework](frameworks/java/README.md).
 
 ## Examples
@@ -65,7 +67,8 @@ architecture. The project consists of two main modules:
 - **Dynamic Agent Discovery**: Agents register their capabilities with the proxy, allowing them to be easily called when
   needed.
 - **Real-Time Event Processing**: Topics enables scalable and reliable event-driven communication.
-- **Multi-Agent Collaboration**: Multiple agents can work together, exchanging data and insights through the **Agent Proxy
+- **Multi-Agent Collaboration**: Multiple agents can work together, exchanging data and insights through the **Agent
+  Proxy
   **.
 
 This architecture provides a **flexible and scalable** foundation for **agentic workflows** by combining **MCP, OpenAPI,
@@ -131,7 +134,8 @@ To run the proxy, set the following environment variables:
 ### Optional Environment Variable
 
 - `REGISTRY_TOPIC` - The topic for MCP registry (default: `_agent_registry`)
-- `CLIENT_ID` - The unique client id. If not specified, a new UUID will be generated and saved into a `.pid` file in the current directory.
+- `CLIENT_ID` - The unique client id. If not specified, a new UUID will be generated and saved into a `.pid` file in the
+  current directory.
 
 ## Contributing
 

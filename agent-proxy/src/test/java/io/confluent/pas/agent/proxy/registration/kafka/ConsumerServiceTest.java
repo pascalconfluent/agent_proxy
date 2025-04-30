@@ -2,7 +2,8 @@ package io.confluent.pas.agent.proxy.registration.kafka;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.confluent.pas.agent.common.services.Schemas;
+import io.confluent.pas.agent.common.services.schemas.Registration;
+import io.confluent.pas.agent.proxy.frameworks.java.models.Key;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -19,7 +20,7 @@ import static org.mockito.Mockito.*;
 class ConsumerServiceTest {
 
     @Mock
-    private Consumer<JsonNode, JsonNode> consumer;
+    private Consumer<Key, JsonNode> consumer;
 
     private ConsumerService consumerService;
 
@@ -31,7 +32,7 @@ class ConsumerServiceTest {
 
     @Test
     void testAddRegistrations() {
-        Schemas.Registration registration = new Schemas.Registration("testTool", "testDescription", "requestTopic", "responseTopic");
+        Registration registration = new Registration("testTool", "testDescription", "requestTopic", "responseTopic");
         consumerService.addRegistrations(Collections.singletonList(registration));
 
         verify(consumer).subscribe(Collections.singletonList("responseTopic"));
@@ -39,7 +40,7 @@ class ConsumerServiceTest {
 
     @Test
     void testRegisterResponseHandler() {
-        Schemas.Registration registration = new Schemas.Registration("testTool", "testDescription", "requestTopic", "responseTopic");
+        Registration registration = new Registration("testTool", "testDescription", "requestTopic", "responseTopic");
         ConsumerService.ResponseHandler handler = mock(ConsumerService.ResponseHandler.class);
         ConsumerService.ErrorHandler errorHandler = mock(ConsumerService.ErrorHandler.class);
 
@@ -56,14 +57,14 @@ class ConsumerServiceTest {
 
     @Test
     void testHandleResponse() throws IOException {
-        Schemas.Registration registration = new Schemas.Registration("testTool", "testDescription", "requestTopic", "responseTopic");
+        Registration registration = new Registration("testTool", "testDescription", "requestTopic", "responseTopic");
         ConsumerService.ResponseHandler handler = mock(ConsumerService.ResponseHandler.class);
         ConsumerService.ErrorHandler errorHandler = mock(ConsumerService.ErrorHandler.class);
 
         consumerService.registerResponseHandler(registration, "correlationId", handler, errorHandler);
 
         ObjectMapper mapper = new ObjectMapper();
-        JsonNode key = mapper.readTree("{\"correlationId\": \"correlationId\"}");
+        Key key = new Key("correlationId");
         JsonNode message = mapper.readTree("{\"message\": \"testMessage\"}");
 
         consumerService.handleResponse("responseTopic", key, message);

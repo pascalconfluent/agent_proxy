@@ -1,5 +1,7 @@
 package io.confluent.pas.agent.common.services;
 
+import io.confluent.pas.agent.common.services.schemas.Registration;
+import io.confluent.pas.agent.common.services.schemas.RegistrationKey;
 import org.apache.kafka.common.TopicPartition;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -15,9 +17,9 @@ import static org.mockito.Mockito.*;
 public class RegistrationServiceHandlerTest {
 
     @Mock
-    private RegistrationServiceHandler.Handler<Schemas.RegistrationKey, Schemas.Registration> handler;
+    private RegistrationServiceHandler.Handler<RegistrationKey, Registration> handler;
 
-    private RegistrationServiceHandler<Schemas.RegistrationKey, Schemas.Registration> registrationServiceHandler;
+    private RegistrationServiceHandler<RegistrationKey, Registration> registrationServiceHandler;
 
     @BeforeEach
     public void setUp() {
@@ -45,8 +47,8 @@ public class RegistrationServiceHandlerTest {
 
     @Test
     public void testHandleUpdateBeforeInitialization() {
-        Schemas.RegistrationKey key = new Schemas.RegistrationKey("key");
-        Schemas.Registration value = new Schemas.Registration();
+        RegistrationKey key = new RegistrationKey("key");
+        Registration value = new Registration();
         TopicPartition tp = new TopicPartition("topic", 0);
 
         registrationServiceHandler.handleUpdate(key, value, null, tp, 0L, 0L);
@@ -56,8 +58,8 @@ public class RegistrationServiceHandlerTest {
 
     @Test
     public void testHandleUpdateAfterInitialization() {
-        Schemas.RegistrationKey key = new Schemas.RegistrationKey("Key");
-        Schemas.Registration value = new Schemas.Registration();
+        RegistrationKey key = new RegistrationKey("Key");
+        Registration value = new Registration();
         TopicPartition tp = new TopicPartition("topic", 0);
 
         registrationServiceHandler.cacheInitialized(1, new HashMap<>());
@@ -68,11 +70,11 @@ public class RegistrationServiceHandlerTest {
 
     @Test
     public void testHandleUpdateWithNullValue() {
-        Schemas.RegistrationKey key = new Schemas.RegistrationKey("Name");
+        RegistrationKey key = new RegistrationKey("Name");
         TopicPartition tp = new TopicPartition("topic", 0);
 
         registrationServiceHandler.cacheInitialized(1, new HashMap<>());
-        registrationServiceHandler.handleUpdate(key, null, new Schemas.Registration(), tp, 0L, 0L);
+        registrationServiceHandler.handleUpdate(key, null, new Registration(), tp, 0L, 0L);
 
         verify(handler, times(1)).handleRegistrations(new HashMap<>() {{
             put(key, null);

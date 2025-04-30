@@ -1,0 +1,204 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "AgentCard",
+    "description": "Schema for agent card information",
+    "type": "object",
+    "required": [
+        "name",
+        "url",
+        "version",
+        "capabilities",
+        "skills"
+    ],
+    "properties": {
+        "name": {
+            "type": "string",
+            "description": "The name of the agent"
+        },
+        "description": {
+            "type": [
+                "string",
+                "null"
+            ],
+            "description": "Description of the agent"
+        },
+        "url": {
+            "type": "string",
+            "format": "uri",
+            "description": "URL for the agent"
+        },
+        "provider": {
+            "type": [
+                "object",
+                "null"
+            ],
+            "description": "Information about the agent provider",
+            "properties": {
+                "organization": {
+                    "type": "string",
+                    "description": "Organization name providing the agent"
+                },
+                "url": {
+                    "type": [
+                        "string",
+                        "null"
+                    ],
+                    "format": "uri",
+                    "description": "URL for the provider organization"
+                }
+            },
+            "required": [
+                "organization"
+            ]
+        },
+        "version": {
+            "type": "string",
+            "description": "Version of the agent"
+        },
+        "documentationUrl": {
+            "type": [
+                "string",
+                "null"
+            ],
+            "format": "uri",
+            "description": "URL to agent documentation"
+        },
+        "capabilities": {
+            "type": "object",
+            "description": "Agent capabilities configuration",
+            "properties": {
+                "streaming": {
+                    "type": "boolean",
+                    "description": "Whether the agent supports streaming",
+                    "default": false
+                },
+                "pushNotifications": {
+                    "type": "boolean",
+                    "description": "Whether the agent supports push notifications",
+                    "default": false
+                },
+                "stateTransitionHistory": {
+                    "type": "boolean",
+                    "description": "Whether the agent supports state transition history",
+                    "default": false
+                }
+            }
+        },
+        "authentication": {
+            "type": [
+                "object",
+                "null"
+            ],
+            "description": "Authentication configuration for the agent",
+            "properties": {
+                "schemes": {
+                    "type": "array",
+                    "description": "Authentication schemes supported by the agent",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "credentials": {
+                    "type": [
+                        "string",
+                        "null"
+                    ],
+                    "description": "Credentials for authenticating with the agent"
+                }
+            },
+            "required": [
+                "schemes"
+            ]
+        },
+        "defaultInputModes": {
+            "type": "array",
+            "description": "Default input modes supported by the agent",
+            "items": {
+                "type": "string"
+            },
+            "default": [
+                "text"
+            ]
+        },
+        "defaultOutputModes": {
+            "type": "array",
+            "description": "Default output modes supported by the agent",
+            "items": {
+                "type": "string"
+            },
+            "default": [
+                "text"
+            ]
+        },
+        "skills": {
+            "type": "array",
+            "description": "List of skills provided by the agent",
+            "items": {
+                "type": "object",
+                "description": "Agent skill information",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "description": "Unique identifier for the skill"
+                    },
+                    "name": {
+                        "type": "string",
+                        "description": "Name of the skill"
+                    },
+                    "description": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "Description of the skill"
+                    },
+                    "tags": {
+                        "type": [
+                            "array",
+                            "null"
+                        ],
+                        "description": "Tags associated with the skill",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "examples": {
+                        "type": [
+                            "array",
+                            "null"
+                        ],
+                        "description": "Example usages of the skill",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "inputModes": {
+                        "type": [
+                            "array",
+                            "null"
+                        ],
+                        "description": "Input modes supported by the skill",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "outputModes": {
+                        "type": [
+                            "array",
+                            "null"
+                        ],
+                        "description": "Output modes supported by the skill",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "required": [
+                    "id",
+                    "name"
+                ]
+            }
+        }
+    },
+    "additionalProperties": false
+}

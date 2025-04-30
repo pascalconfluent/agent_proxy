@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import io.confluent.pas.agent.common.services.KafkaConfiguration;
 import io.confluent.pas.agent.common.services.KafkaPropertiesFactory;
 import io.confluent.pas.agent.common.utils.Lazy;
+import io.confluent.pas.agent.proxy.frameworks.java.models.Key;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.producer.KafkaProducer;
@@ -20,7 +21,7 @@ import java.io.Closeable;
 @AllArgsConstructor
 public class ProducerService implements Closeable {
 
-    private final Lazy<KafkaProducer<JsonNode, JsonNode>> producer;
+    private final Lazy<KafkaProducer<Key, JsonNode>> producer;
 
     public ProducerService(KafkaConfiguration kafkaConfiguration) {
         this(new Lazy<>(() -> new KafkaProducer<>(KafkaPropertiesFactory.getProducerProperties(kafkaConfiguration))));
@@ -34,9 +35,9 @@ public class ProducerService implements Closeable {
      * @param value the value
      * @return a Mono that will complete when the message is sent
      */
-    public Mono<Void> send(String topic, JsonNode key, JsonNode value) {
+    public Mono<Void> send(String topic, Key key, JsonNode value) {
         return Mono.create(sink -> {
-            final ProducerRecord<JsonNode, JsonNode> record = new ProducerRecord<>(topic, key, value);
+            final ProducerRecord<Key, JsonNode> record = new ProducerRecord<>(topic, key, value);
 
             producer.get()
                     .send(record, (metadata, exception) -> {

@@ -3,6 +3,7 @@
 [Back to Main README](../README.md)
 
 ## Table of Contents
+
 - [Overview](#overview)
 - [Building the Proxy and the Shell](#building-the-proxy-and-the-shell)
     - [Prerequisites](#prerequisites)
@@ -11,8 +12,8 @@
 - [Tables and Queries](#tables-and-queries)
     - [Clients Table](#clients-table)
     - [Sample Data](#sample-data)
-    - [Response Table](#response-table)
-    - [Request Table](#request-table)
+    - [Response Table](#subscriptionResponse-table)
+    - [Request Table](#subscriptionRequest-table)
     - [Join Query](#join-query)
     - [Service Registration Query](#service-registration-query)
 - [Demo Execution](#demo-execution)
@@ -24,31 +25,39 @@
 - [Execution Example](#execution-example)
 
 ## Overview
-This example demonstrates how an LLM can retrieve client information based on a user's first name. The process involves joining incoming requests with client data stored in a Flink table to generate responses.
+
+This example demonstrates how an LLM can retrieve client information based on a user's first name. The process involves
+joining incoming requests with client data stored in a Flink table to generate responses.
 
 ## Building the Proxy and the Shell
+
 To build the Agent proxy and the shell, follow these steps:
 
 ### Prerequisites
+
 - Java 21+
 - Maven
 
 ### Clone the Repository
+
 ```sh
 git clone https://...
 cd mcp-openapi-proxy
 ```
 
 ### Build the Project
+
 ```sh
 mvn clean install
 ```
 
 ## Tables and Queries
 
-You can execute the following SQL queries using either the **Confluent Cloud CLI** or the **Flink SQL workspace UI**. These tools provide an easy way to create tables, insert data, and manage streaming queries efficiently.
+You can execute the following SQL queries using either the **Confluent Cloud CLI** or the **Flink SQL workspace UI**.
+These tools provide an easy way to create tables, insert data, and manage streaming queries efficiently.
 
 ### Clients Table
+
 Stores client details including their unique `client_id`, `firstname`, and `lastname`.
 
 ```sql
@@ -69,6 +78,7 @@ WITH
 ```
 
 #### Sample Data
+
 ```sql
 INSERT INTO `clients` VALUES 
   ('123', 'Pascal', 'Vantrepote'),
@@ -78,6 +88,7 @@ INSERT INTO `clients` VALUES
 ```
 
 ### Response Table
+
 Stores the results of client information queries.
 
 ```sql
@@ -99,6 +110,7 @@ WITH
 ```
 
 ### Request Table
+
 Receives client information queries from LLMs.
 
 ```sql
@@ -118,6 +130,7 @@ WITH
 ```
 
 ### Join Query
+
 Processes client requests by joining them with stored client data to generate responses.
 
 ```sql
@@ -127,6 +140,7 @@ INSERT INTO client_info_response (requestId, `firstname`, lastname, client_id)
 ``` 
 
 ### Service Registration Query
+
 Registers the client information retrieval service in the MCP/OpenAPI registry.
 
 ```sql
@@ -153,10 +167,13 @@ INSERT INTO `_agent_registry` VALUES ('clientInfo', 'Get the client information 
 ```
 
 ## Demo Execution
+
 To run the demo, you need to set up the necessary environment variables and open multiple terminal sessions.
 
 ### Step 1: Export Environment Variables
+
 Before starting the proxy and shell, set the required environment variables:
+
 ```sh
 export BROKER_URL="your-confluent-broker"
 export JAAS_USERNAME="your-api-key"
@@ -167,24 +184,31 @@ export SR_API_SECRET="your-schema-registry-secret"
 ```
 
 ### Step 2: Open Multiple Terminals
+
 #### Terminal 1: Run the Agent Proxy
+
 ```sh
 java -jar proxy/target/proxy-0.0.1-SNAPSHOT.jar
 ```
 
 #### Terminal 2: Run the MCP Shell
+
 ```sh
 java -jar shell/target/shell-0.0.1-SNAPSHOT.jar
 ```
 
 ### Step 3: Execute Commands in the MCP Shell
+
 Once the shell is running, execute the following commands to set up the service and test LLM integration:
+
 ```sh
 mcp add sse http://localhost:8080
 mcp list tools "MCP Server"
 llm gemini
 ```
+
 ### Execution Example
+
 Below is an example of how the shell interacts with the MCP proxy and LLM:
 
 ```

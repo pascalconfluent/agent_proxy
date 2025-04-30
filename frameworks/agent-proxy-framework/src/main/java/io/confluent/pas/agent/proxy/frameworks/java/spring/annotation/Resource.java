@@ -1,6 +1,6 @@
 package io.confluent.pas.agent.proxy.frameworks.java.spring.annotation;
 
-import io.confluent.pas.agent.common.services.Schemas;
+import io.confluent.pas.agent.common.services.schemas.ResourceResponse;
 import io.confluent.pas.agent.proxy.frameworks.java.models.Key;
 
 import java.lang.annotation.ElementType;
@@ -29,12 +29,12 @@ public @interface Resource {
     /**
      * The Kafka topic name where resource requests will be received.
      */
-    String request_topic();
+    String request_topic() default "";
 
     /**
      * The Kafka topic name where resource responses will be sent.
      */
-    String response_topic();
+    String response_topic() default "";
 
     /**
      * The MIME type of the resource content.
@@ -45,17 +45,10 @@ public @interface Resource {
      * The endpoint path where this resource will be exposed.
      */
     String path();
-    
-    /**
-     * The class type for the Kafka message key.
-     * Must extend the Key class.
-     * Defaults to Key.class.
-     */
-    Class<? extends Key> keyClass() default Key.class;
 
     /**
      * The class type for the response message payload.
      * Must extend ResourceResponse.
      */
-    Class<? extends Schemas.ResourceResponse> responseClass();
+    Class<? extends ResourceResponse> responseClass();
 }

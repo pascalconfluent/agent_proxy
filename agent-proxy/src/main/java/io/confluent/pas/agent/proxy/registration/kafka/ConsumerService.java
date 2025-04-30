@@ -2,7 +2,8 @@ package io.confluent.pas.agent.proxy.registration.kafka;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import io.confluent.pas.agent.common.services.KafkaConfiguration;
-import io.confluent.pas.agent.common.services.Schemas;
+import io.confluent.pas.agent.common.services.schemas.Registration;
+import io.confluent.pas.agent.proxy.frameworks.java.models.Key;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -76,7 +77,7 @@ public class ConsumerService implements Closeable {
      * @param registrationHandlers Map of correlation IDs to their handlers
      */
     public record RegistrationItem(
-            Schemas.Registration registration,
+            Registration registration,
             Map<String, RegistrationHandler> registrationHandlers) {
     }
 
@@ -92,7 +93,7 @@ public class ConsumerService implements Closeable {
     /**
      * The Kafka consumer used to receive messages.
      */
-    private final Consumer<JsonNode, JsonNode> consumer;
+    private final Consumer<Key, JsonNode> consumer;
 
     /**
      * Creates a new ConsumerService with the specified Kafka configuration.
@@ -104,7 +105,6 @@ public class ConsumerService implements Closeable {
     public ConsumerService(KafkaConfiguration kafkaConfiguration, long responseTimeout) {
         this.consumer = new Consumer<>(
                 kafkaConfiguration,
-                JsonNode.class,
                 JsonNode.class,
                 this::handleResponse,
                 this::checkTimeouts);
@@ -119,7 +119,7 @@ public class ConsumerService implements Closeable {
      * @param responseTimeout The maximum time to wait for a response before
      *                        timing out
      */
-    public ConsumerService(Consumer<JsonNode, JsonNode> consumer, long responseTimeout) {
+    public ConsumerService(Consumer<Key, JsonNode> consumer, long responseTimeout) {
         this.consumer = Objects.requireNonNull(consumer, "Consumer must not be null");
         this.responseTimeout = responseTimeout;
     }
@@ -129,14 +129,14 @@ public class ConsumerService implements Closeable {
      *
      * @param registrations The collection of registrations to subscribe to
      */
-    public void addRegistrations(Collection<Schemas.Registration> registrations) {
+    public void addRegistrations(Collection<Registration> registrations) {
         if (registrations == null || registrations.isEmpty()) {
             log.warn("No registrations provided to add");
             return;
         }
 
         List<String> topics = registrations.stream()
-                .map(Schemas.Registration::getResponseTopicName)
+                .map(Registration::getResponseTopicName)
                 .collect(Collectors.toList());
 
         log.info("Subscribing to response topics: {}", topics);
@@ -150,11 +150,10 @@ public class ConsumerService implements Closeable {
      * @param correlationId The correlation ID to associate with the handler
      * @param handler       The handler to process responses
      * @param errorHandler  The handler to process errors
-     *
      * @throws NullPointerException if any parameter is null
      */
     public void registerResponseHandler(
-            Schemas.Registration registration,
+            Registration registration,
             String correlationId,
             ResponseHandler handler,
             ErrorHandler errorHandler) {
@@ -196,6 +195,34 @@ public class ConsumerService implements Closeable {
         });
     }
 
+
+    /**
+     * Unregisters a handler for responses with a specific correlation ID.
+     *
+     * @param registration  The service registration details
+     * @param correlationId The correlation ID to unregister
+     * @throws NullPointerException if any parameter is null
+     */
+    public void unregisterResponseHandler(Registration registration, String correlationId) {
+        Objects.requireNonNull(registration, "Registration must not be null");
+        Objects.requireNonNull(correlationId, "CorrelationId must not be null");
+
+        final String responseTopic = registration.getResponseTopicName();
+        final String normalizedCorrelationId = correlationId.toLowerCase();
+
+        log.info("Unregistering response handler for topic: {} with correlation ID: {}",
+                responseTopic, normalizedCorrelationId);
+
+        RegistrationItem registrationItem = responseHandlers.get(responseTopic);
+        if (registrationItem != null) {
+            Map<String, RegistrationHandler> handlers = registrationItem.registrationHandlers();
+            handlers.remove(normalizedCorrelationId);
+            log.debug("Handler removed for correlation ID: {}", normalizedCorrelationId);
+        } else {
+            log.warn("No registration item found for topic: {}", responseTopic);
+        }
+    }
+
     /**
      * Closes the consumer and releases resources.
      *
@@ -216,7 +243,7 @@ public class ConsumerService implements Closeable {
      * @param key     The message key (contains correlation ID)
      * @param message The message content
      */
-    void handleResponse(String topic, JsonNode key, JsonNode message) {
+    void handleResponse(String topic, Key key, JsonNode message) {
         if (log.isDebugEnabled()) {
             log.debug("Received response on topic: {}", topic);
         }
@@ -228,15 +255,8 @@ public class ConsumerService implements Closeable {
             return;
         }
 
-        // Extract the correlation ID
-        String correlationIdFieldName = registrationItem.registration.getCorrelationIdFieldName();
-        if (!key.has(correlationIdFieldName)) {
-            log.warn("Key is missing correlation ID field '{}': {}", correlationIdFieldName, key);
-            return;
-        }
-
         // Find and execute the handler
-        String correlationId = key.get(correlationIdFieldName).asText().toLowerCase();
+        String correlationId = key.getCorrelationId().toLowerCase();
         processMessageWithHandler(topic, message, correlationId, registrationItem.registrationHandlers);
     }
 

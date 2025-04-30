@@ -1,24 +1,17 @@
 package io.confluent.pas.agent.proxy.registration;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import io.confluent.pas.agent.common.services.KafkaConfiguration;
-import io.confluent.pas.agent.common.services.Schemas;
+import io.confluent.pas.agent.common.services.schemas.Registration;
 import io.confluent.pas.agent.proxy.registration.kafka.ConsumerService;
 import io.confluent.pas.agent.proxy.registration.kafka.ProducerService;
-import io.confluent.pas.agent.proxy.registration.schemas.RegistrationSchema;
-import io.confluent.pas.agent.proxy.registration.schemas.RegistrationSchemas;
 import io.micrometer.observation.ObservationRegistry;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;
-import reactor.core.publisher.Mono;
 
 import java.util.Collection;
-import java.util.Map;
-import java.util.concurrent.ExecutionException;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 class RequestResponseHandlerTest {
@@ -56,14 +49,14 @@ class RequestResponseHandlerTest {
 
     @Test
     void testAddRegistrations() {
-        Collection<Schemas.Registration> registrations = mock(Collection.class);
+        Collection<Registration> registrations = mock(Collection.class);
         requestResponseHandler.addRegistrations(registrations);
         verify(consumerService, times(1)).addRegistrations(registrations);
     }
 
 //    @Test
 //    void testSendRequestResponse() throws ExecutionException, InterruptedException {
-//        Schemas.Registration registration = new Schemas.Registration("testTool", "description", "requestTopic", "responseTopic");
+//        Registration registration = new Registration("testTool", "description", "requestTopic", "responseTopic");
 //        RegistrationSchemas schemas = mock(RegistrationSchemas.class);
 //        String correlationId = "testCorrelationId";
 //        Map<String, Object> request = Map.of("key", "value");

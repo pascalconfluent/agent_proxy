@@ -3,6 +3,7 @@ package io.confluent.pas.agent.proxy.registration.kafka;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.confluent.pas.agent.common.utils.Lazy;
+import io.confluent.pas.agent.proxy.frameworks.java.models.Key;
 import org.apache.kafka.clients.producer.Callback;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
@@ -23,7 +24,7 @@ import static org.mockito.Mockito.*;
 class ProducerServiceTest {
 
     @Mock
-    private KafkaProducer<JsonNode, JsonNode> kafkaProducer;
+    private KafkaProducer<Key, JsonNode> kafkaProducer;
 
     private ProducerService producerService;
 
@@ -41,7 +42,7 @@ class ProducerServiceTest {
     void testSend() throws Exception {
         String topic = "test-topic";
         ObjectMapper mapper = new ObjectMapper();
-        JsonNode key = mapper.readTree("{\"key\": \"value\"}");
+        Key key = new Key("value");
         JsonNode value = mapper.readTree("{\"value\": \"test\"}");
 
         Future<RecordMetadata> future = mock(Future.class);
@@ -77,7 +78,7 @@ class ProducerServiceTest {
     void testSendWithException() throws Exception {
         String topic = "test-topic";
         ObjectMapper mapper = new ObjectMapper();
-        JsonNode key = mapper.readTree("{\"key\": \"value\"}");
+        Key key = new Key("value");
         JsonNode value = mapper.readTree("{\"value\": \"test\"}");
 
         when(kafkaProducer.send(any(ProducerRecord.class), any(Callback.class)))

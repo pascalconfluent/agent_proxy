@@ -5,6 +5,8 @@ import io.confluent.kafka.serializers.json.KafkaJsonSchemaDeserializer;
 import io.confluent.kafka.serializers.json.KafkaJsonSchemaDeserializerConfig;
 import io.confluent.kafka.serializers.json.KafkaJsonSchemaSerializer;
 import io.confluent.kafka.serializers.json.KafkaJsonSchemaSerializerConfig;
+import io.confluent.pas.agent.common.services.schemas.Registration;
+import io.confluent.pas.agent.common.services.schemas.RegistrationKey;
 import io.confluent.pas.agent.common.utils.SchemaUtils;
 import io.kcache.KafkaCache;
 import lombok.extern.slf4j.Slf4j;
@@ -23,7 +25,7 @@ import java.util.Map;
  */
 
 @Slf4j
-public class RegistrationService<K extends Schemas.RegistrationKey, R extends Schemas.Registration> implements Closeable {
+public class RegistrationService<K extends RegistrationKey, R extends Registration> implements Closeable {
 
     private final Map<K, R> registrationCache;
 
@@ -176,7 +178,7 @@ public class RegistrationService<K extends Schemas.RegistrationKey, R extends Sc
      *                             (optional, can be null)
      * @return the initialized Kafka cache
      */
-    private static <K extends Schemas.RegistrationKey, R extends Schemas.Registration> KafkaCache<K, R> initialize(
+    private static <K extends RegistrationKey, R extends Registration> KafkaCache<K, R> initialize(
             KafkaConfiguration kafkaConfiguration,
             Class<K> registrationKeyClass,
             Class<R> registrationClass,

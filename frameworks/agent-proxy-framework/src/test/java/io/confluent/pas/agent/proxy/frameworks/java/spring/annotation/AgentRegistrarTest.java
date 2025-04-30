@@ -1,7 +1,8 @@
 package io.confluent.pas.agent.proxy.frameworks.java.spring.annotation;
 
 import io.confluent.pas.agent.common.services.KafkaConfiguration;
-import io.confluent.pas.agent.common.services.Schemas;
+import io.confluent.pas.agent.common.services.schemas.Registration;
+import io.confluent.pas.agent.common.services.schemas.ResourceResponse;
 import io.confluent.pas.agent.proxy.frameworks.java.SubscriptionHandler;
 import lombok.Getter;
 import lombok.Setter;
@@ -26,7 +27,7 @@ public class AgentRegistrarTest {
 
     @Getter
     @Setter
-    static class Response extends Schemas.ResourceResponse {
+    static class Response extends ResourceResponse {
         public int result;
     }
 
@@ -38,7 +39,7 @@ public class AgentRegistrarTest {
     private KafkaConfiguration kafkaConfiguration;
 
     @Mock
-    private SubscriptionHandler<?, ?, ?> subscriptionHandler;
+    private SubscriptionHandler<?, ?> subscriptionHandler;
 
     private AgentRegistrar agentRegistrar;
 
@@ -56,7 +57,7 @@ public class AgentRegistrarTest {
         when(kafkaConfiguration.topicConfiguration()).thenReturn(new KafkaConfiguration.DefaultTopicConfiguration());
         when(kafkaConfiguration.saslMechanism()).thenReturn(KafkaConfiguration.DEFAULT_SASL_MECHANISM);
 
-        agentRegistrar = new AgentRegistrar(applicationContext, (keyClass, requestClass, responseClass) -> subscriptionHandler);
+        agentRegistrar = new AgentRegistrar(applicationContext, (requestClass, responseClass) -> subscriptionHandler);
     }
 
     @Test
@@ -70,10 +71,10 @@ public class AgentRegistrarTest {
         agentRegistrar.afterPropertiesSet();
 
         // Verify the subscription handler is created and subscribed
-        ArgumentCaptor<Schemas.Registration> registrationCaptor = ArgumentCaptor.forClass(Schemas.Registration.class);
+        ArgumentCaptor<Registration> registrationCaptor = ArgumentCaptor.forClass(Registration.class);
         verify(subscriptionHandler, times(2)).subscribeWith(registrationCaptor.capture(), any());
 
-        List<Schemas.Registration> registrations = registrationCaptor.getAllValues();
+        List<Registration> registrations = registrationCaptor.getAllValues();
         assertEquals(2, registrations.size());
         assertEquals("testAgent", registrations.get(0).getName());
     }

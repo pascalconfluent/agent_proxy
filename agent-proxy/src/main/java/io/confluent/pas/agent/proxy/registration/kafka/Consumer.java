@@ -2,6 +2,7 @@ package io.confluent.pas.agent.proxy.registration.kafka;
 
 import io.confluent.pas.agent.common.services.KafkaConfiguration;
 import io.confluent.pas.agent.common.services.KafkaPropertiesFactory;
+import io.confluent.pas.agent.proxy.frameworks.java.models.Key;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -42,14 +43,11 @@ public class Consumer<K, V> implements Closeable {
      * Constructs a Consumer instance with the specified Kafka configuration and
      * message types.
      *
-     * @param kafkaConfiguration Kafka configuration containing connection and auth
-     *                           details
-     * @param keyClass           Class type for message keys
+     * @param kafkaConfiguration Kafka configuration containing connection and auth details
      * @param requestClass       Class type for message values
      * @param timeoutChecker     The timeout checker to use
      */
     public Consumer(KafkaConfiguration kafkaConfiguration,
-            Class<K> keyClass,
             Class<V> requestClass,
             ConsumerHandler<K, V> consumerHandler,
             TimeoutChecker timeoutChecker) {
@@ -57,7 +55,7 @@ public class Consumer<K, V> implements Closeable {
                 new KafkaConsumer<>(KafkaPropertiesFactory.getConsumerProperties(
                         kafkaConfiguration,
                         false,
-                        keyClass,
+                        Key.class,
                         requestClass)),
                 timeoutChecker);
     }

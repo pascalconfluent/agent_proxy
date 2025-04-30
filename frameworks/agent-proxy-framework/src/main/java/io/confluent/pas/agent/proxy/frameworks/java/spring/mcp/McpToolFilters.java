@@ -1,6 +1,6 @@
 package io.confluent.pas.agent.proxy.frameworks.java.spring.mcp;
 
-import io.confluent.pas.agent.common.services.Schemas;
+import io.confluent.pas.agent.common.services.schemas.Registration;
 import io.modelcontextprotocol.spec.McpSchema;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -31,7 +31,7 @@ class McpToolFilters<T extends McpToolFilters<T>> {
      *
      * @param registration Tool registration information.
      */
-    public McpToolFilters(Schemas.Registration registration) {
+    public McpToolFilters(Registration registration) {
         deny(registration.getName());
     }
 

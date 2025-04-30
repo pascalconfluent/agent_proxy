@@ -5,26 +5,26 @@
 ## Table of Contents
 
 - [Flink-Based Loan Product Search Agent](#flink-based-loan-product-search-agent)
-  - [Table of Contents](#table-of-contents)
-  - [Overview](#overview)
-  - [Architecture](#architecture)
-  - [Prerequisites](#prerequisites)
-  - [Step-by-Step Guide](#step-by-step-guide)
-    - [1. Set Up Flink Connections](#1-set-up-flink-connections)
-    - [2. Create Bedrock Models](#2-create-bedrock-models)
-    - [3. Set Up Elasticsearch](#3-set-up-elasticsearch)
-    - [4. Create Flink Tables](#4-create-flink-tables)
-    - [5. Set Up Document Indexing](#5-set-up-document-indexing)
-      - [5.1 Create Elasticsearch Sink Connector](#51-create-elasticsearch-sink-connector)
-      - [5.2 Insert Sample Products](#52-insert-sample-products)
-      - [5.3 Generate Product Summaries](#53-generate-product-summaries)
-      - [5.4 Generate Product Embeddings](#54-generate-product-embeddings)
-    - [6. Create the Processing Pipeline](#6-create-the-processing-pipeline)
-      - [6.1 Generate Message Embeddings](#61-generate-message-embeddings)
-      - [6.2 Correlate products to messages](#62-correlate-products-to-messages)
-    - [7. Register the Agent with Agent Proxy](#7-register-the-agent-with-mcpopenapi-proxy)
-  - [Testing the Agent](#testing-the-agent)
-  - [Conclusion](#conclusion)
+    - [Table of Contents](#table-of-contents)
+    - [Overview](#overview)
+    - [Architecture](#architecture)
+    - [Prerequisites](#prerequisites)
+    - [Step-by-Step Guide](#step-by-step-guide)
+        - [1. Set Up Flink Connections](#1-set-up-flink-connections)
+        - [2. Create Bedrock Models](#2-create-bedrock-models)
+        - [3. Set Up Elasticsearch](#3-set-up-elasticsearch)
+        - [4. Create Flink Tables](#4-create-flink-tables)
+        - [5. Set Up Document Indexing](#5-set-up-document-indexing)
+            - [5.1 Create Elasticsearch Sink Connector](#51-create-elasticsearch-sink-connector)
+            - [5.2 Insert Sample Products](#52-insert-sample-products)
+            - [5.3 Generate Product Summaries](#53-generate-product-summaries)
+            - [5.4 Generate Product Embeddings](#54-generate-product-embeddings)
+        - [6. Create the Processing Pipeline](#6-create-the-processing-pipeline)
+            - [6.1 Generate Message Embeddings](#61-generate-message-embeddings)
+            - [6.2 Correlate products to messages](#62-correlate-products-to-messages)
+        - [7. Register the Agent with Agent Proxy](#7-register-the-agent-with-mcpopenapi-proxy)
+    - [Testing the Agent](#testing-the-agent)
+    - [Conclusion](#conclusion)
 
 ## Overview
 
@@ -101,7 +101,7 @@ Set up the models for text generation and embeddings:
 CREATE
 MODEL BedrockGeneralModel
 INPUT (text STRING)
-OUTPUT (response STRING)
+OUTPUT (subscriptionResponse STRING)
 COMMENT 'General model with no system prompt.'
 WITH (
     'task' = 'text_generation',
@@ -557,7 +557,7 @@ Create summaries of the products using the Claude model:
 ```sql
 insert into `products_summarized`
 select product_id,
-       response,
+       subscriptionResponse,
        description,
        type,
        name,
@@ -578,7 +578,7 @@ from `products`,
             (
 '
 <instructions>
-You are a summarization assistant tasked with generating concise, accurate summaries of loan data for indexing in a vector database. Your summary must include all key information such as the required credit score, term of the loan, name of the loan, interest rate, and any other significant details provided in the input. The output should be a single-paragraph summary suitable for indexing purposes. **Do not include any tags (e.g., XML or JSON) in the response. Only provide plain text.**
+You are a summarization assistant tasked with generating concise, accurate summaries of loan data for indexing in a vector database. Your summary must include all key information such as the required credit score, term of the loan, name of the loan, interest rate, and any other significant details provided in the input. The output should be a single-paragraph summary suitable for indexing purposes. **Do not include any tags (e.g., XML or JSON) in the subscriptionResponse. Only provide plain text.**
 </instructions>
 
 <context>
@@ -710,7 +710,7 @@ Finally, register the agent to make it available through the Agent Proxy:
 ```sql
 INSERT INTO _agent_registry
 VALUES ('LoanProductSearchAgent',
-        'This agent searches the most relevant loan products based on the clients request',
+        'This agent searches the most relevant loan products based on the clients subscriptionRequest',
         'user_message',
         'user_message_related_products',
         'correlationId',

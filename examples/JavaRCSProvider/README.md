@@ -17,13 +17,13 @@ The architecture leverages the annotation-based configuration for automatic inte
 ```
 +----------------------+          +-----------------------------+          +-----------------------+
 |   Incoming Request   | -------> |       Agent Proxy           | <------- | Kafka Response Topic  |
-|   (MCP Client)       |          | (Routes via @Resource info) |          | resource-response     |
+|   (MCP Client)       |          | (Routes via @Resource info) |          | resource-subscriptionResponse     |
 +----------------------+          +-----------------------------+          +-----------------------+
                                                  |                                      ^
                                                  v                                      |
                               +-----------------------------+        +-----------------------------+
                               | Kafka Request Topic         | ------>| Resource Provider Agent     |
-                              | resource-request            |        | (@Resource annotated class) |
+                              | resource-subscriptionRequest            |        | (@Resource annotated class) |
                               +-----------------------------+        +-----------------------------+
 ```
 
@@ -70,8 +70,8 @@ The core logic is implemented in the `ResourceAgent.java` class, explicitly mark
 @Resource(
         name = "resource-agent--rcs",
         description = "This agent returns resources.",
-        request_topic = "resource-request",
-        response_topic = "resource-response",
+        request_topic = "resource-subscriptionRequest",
+        response_topic = "resource-subscriptionResponse",
         contentType = "application/json",
         path = "client/{client_id}",
         responseClass = Schemas.TextResourceResponse.class
@@ -82,9 +82,9 @@ The core logic is implemented in the `ResourceAgent.java` class, explicitly mark
 - **description**: Clarifies the agent's resource-provisioning purpose.
 - **request_topic**: Kafka topic from which resource requests are consumed.
 - **response_topic**: Kafka topic used to publish resource responses.
-- **contentType**: MIME type (`application/json`) of the response content.
+- **contentType**: MIME type (`application/json`) of the subscriptionResponse content.
 - **path**: URI template defining the structure of resource requests.
-- **responseClass**: Class defining the structured response (`TextResourceResponse`).
+- **responseClass**: Class defining the structured subscriptionResponse (`TextResourceResponse`).
 
 ---
 
@@ -124,10 +124,10 @@ public class TextResourceResponse {
 
 ## Kafka Topics
 
-- **Request Topic**: `resource-request`  
+- **Request Topic**: `resource-subscriptionRequest`  
   Topic subscribed by the agent to handle incoming resource requests.
 
-- **Response Topic**: `resource-response`  
+- **Response Topic**: `resource-subscriptionResponse`  
   Topic used for publishing resource responses back to requestors.
 
 ---
@@ -135,7 +135,8 @@ public class TextResourceResponse {
 ## Summary
 
 The `@Resource` annotation efficiently configures the Resource Provider Agent, specifying clear communication channels (
-Kafka topics) and structured data (request and response classes), ensuring straightforward integration within
+Kafka topics) and structured data (subscriptionRequest and subscriptionResponse classes), ensuring straightforward
+integration within
 MCP/OpenAPI-driven ecosystems.
 
 ---
@@ -169,13 +170,13 @@ In the MCP Inspector interface:
 ### Step 4: Send Requests and Test
 
 - Select the `/client/{client_id}` tool.
-- Use the request form to send a sample request, such as:
+- Use the subscriptionRequest form to send a sample subscriptionRequest, such as:
 
 ```
 Bob
 ```
 
-- Submit the request and view the response directly in the interface.
+- Submit the subscriptionRequest and view the subscriptionResponse directly in the interface.
 
 ### Example Output
 

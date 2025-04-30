@@ -3,7 +3,8 @@ package io.confluent.pas.agent.proxy.frameworks.java;
 import io.confluent.kafka.schemaregistry.json.JsonSchema;
 import io.confluent.pas.agent.common.services.KafkaConfiguration;
 import io.confluent.pas.agent.common.services.RegistrationService;
-import io.confluent.pas.agent.common.services.Schemas;
+import io.confluent.pas.agent.common.services.schemas.Registration;
+import io.confluent.pas.agent.common.services.schemas.RegistrationKey;
 import io.confluent.pas.agent.proxy.frameworks.java.kafka.TopicManagement;
 import io.confluent.pas.agent.proxy.frameworks.java.models.Key;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -28,7 +29,7 @@ public class SubscriptionHandlerTest {
     private KafkaConfiguration kafkaConfiguration;
 
     @Mock
-    private RegistrationService<Schemas.RegistrationKey, Schemas.Registration> registrationService;
+    private RegistrationService<RegistrationKey, Registration> registrationService;
 
     @Mock
     private TopicManagement topicManagement;
@@ -36,7 +37,7 @@ public class SubscriptionHandlerTest {
     @Mock
     private KafkaStreams kStreams;
 
-    private SubscriptionHandler<Key, Request, Response> subscriptionHandler;
+    private SubscriptionHandler<Request, Response> subscriptionHandler;
 
     @BeforeEach
     public void setUp() {
@@ -54,7 +55,6 @@ public class SubscriptionHandlerTest {
 
         subscriptionHandler = new SubscriptionHandler<>(
                 kafkaConfiguration,
-                Key.class,
                 Request.class,
                 Response.class,
                 registrationService,
@@ -66,12 +66,11 @@ public class SubscriptionHandlerTest {
     public void testSubscribeWith() throws Exception {
 
         subscriptionHandler.subscribeWith(
-                new Schemas.Registration(
+                new Registration(
                         "Name",
                         "Description",
                         "requestTopic",
-                        "responseTopic",
-                        "corrleationId"
+                        "responseTopic"
                 ),
                 (request) -> {
                     request.respond(new Response(request.getRequest().a() + request.getRequest().b()))
@@ -82,8 +81,8 @@ public class SubscriptionHandlerTest {
         verify(topicManagement, times(1)).createTopic(eq("requestTopic"), any(Class.class), any(Class.class));
         verify(topicManagement, times(1)).createTopic(eq("responseTopic"), any(Class.class), any(Class.class));
         verify(topicManagement, times(2)).close();
-        verify(registrationService, times(1)).isRegistered(any(Schemas.RegistrationKey.class));
-        verify(registrationService, times(1)).register(any(Schemas.RegistrationKey.class), any(Schemas.Registration.class));
+        verify(registrationService, times(1)).isRegistered(any(RegistrationKey.class));
+        verify(registrationService, times(1)).register(any(RegistrationKey.class), any(Registration.class));
     }
 
     @Test
@@ -92,12 +91,11 @@ public class SubscriptionHandlerTest {
         final String resSchema = "{\"type\":\"record\",\"name\":\"Response\",\"fields\":[{\"name\":\"result\",\"type\":\"int\"}]}";
 
         subscriptionHandler.subscribeWith(
-                new Schemas.Registration(
+                new Registration(
                         "Name",
                         "Description",
                         "requestTopic",
-                        "responseTopic",
-                        "corrleationId"
+                        "responseTopic"
                 ),
                 new JsonSchema(reqSchema),
                 new JsonSchema(resSchema),
@@ -110,7 +108,7 @@ public class SubscriptionHandlerTest {
         verify(topicManagement, times(1)).createTopic(eq("requestTopic"), any(Class.class), any(JsonSchema.class));
         verify(topicManagement, times(1)).createTopic(eq("responseTopic"), any(Class.class), any(JsonSchema.class));
         verify(topicManagement, times(2)).close();
-        verify(registrationService, times(1)).isRegistered(any(Schemas.RegistrationKey.class));
-        verify(registrationService, times(1)).register(any(Schemas.RegistrationKey.class), any(Schemas.Registration.class));
+        verify(registrationService, times(1)).isRegistered(any(RegistrationKey.class));
+        verify(registrationService, times(1)).register(any(RegistrationKey.class), any(Registration.class));
     }
 }
