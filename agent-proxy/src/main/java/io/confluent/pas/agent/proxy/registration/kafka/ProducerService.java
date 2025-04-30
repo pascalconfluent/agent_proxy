@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import io.confluent.pas.agent.common.services.KafkaConfiguration;
 import io.confluent.pas.agent.common.services.KafkaPropertiesFactory;
 import io.confluent.pas.agent.common.utils.Lazy;
-import io.confluent.pas.agent.proxy.frameworks.java.models.Key;
+import io.confluent.pas.agent.common.services.models.Key;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.producer.KafkaProducer;

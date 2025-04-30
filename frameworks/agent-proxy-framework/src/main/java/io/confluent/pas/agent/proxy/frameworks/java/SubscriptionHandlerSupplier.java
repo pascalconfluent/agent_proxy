@@ -1,8 +1,8 @@
 package io.confluent.pas.agent.proxy.frameworks.java;
 
-import io.confluent.pas.agent.proxy.frameworks.java.models.Key;
-import io.confluent.pas.agent.proxy.frameworks.java.models.Request;
-import io.confluent.pas.agent.proxy.frameworks.java.models.Response;
+import io.confluent.pas.agent.common.services.models.Key;
+import io.confluent.pas.agent.common.services.models.Request;
+import io.confluent.pas.agent.common.services.models.Response;
 import lombok.AllArgsConstructor;
 import org.apache.kafka.streams.processor.api.Processor;
 import org.apache.kafka.streams.processor.api.ProcessorSupplier;

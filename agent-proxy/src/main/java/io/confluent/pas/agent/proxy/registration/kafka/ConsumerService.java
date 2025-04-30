@@ -3,7 +3,7 @@ package io.confluent.pas.agent.proxy.registration.kafka;
 import com.fasterxml.jackson.databind.JsonNode;
 import io.confluent.pas.agent.common.services.KafkaConfiguration;
 import io.confluent.pas.agent.common.services.schemas.Registration;
-import io.confluent.pas.agent.proxy.frameworks.java.models.Key;
+import io.confluent.pas.agent.common.services.models.Key;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 

@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import io.confluent.pas.agent.common.services.schemas.Registration;
 import io.confluent.pas.agent.common.utils.AsyncUtils;
 import io.confluent.pas.agent.common.utils.JsonUtils;
-import io.confluent.pas.agent.proxy.frameworks.java.models.Response;
+import io.confluent.pas.agent.common.services.models.Response;
 import io.confluent.pas.agent.proxy.registration.RequestResponseHandler;
 import io.confluent.pas.agent.proxy.registration.schemas.RegistrationSchemas;
 import io.confluent.pas.agent.proxy.registration.RequestResponseChannel;

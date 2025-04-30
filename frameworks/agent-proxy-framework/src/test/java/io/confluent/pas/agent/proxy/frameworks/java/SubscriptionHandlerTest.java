@@ -6,7 +6,6 @@ import io.confluent.pas.agent.common.services.RegistrationService;
 import io.confluent.pas.agent.common.services.schemas.Registration;
 import io.confluent.pas.agent.common.services.schemas.RegistrationKey;
 import io.confluent.pas.agent.proxy.frameworks.java.kafka.TopicManagement;
-import io.confluent.pas.agent.proxy.frameworks.java.models.Key;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.kafka.streams.KafkaStreams;
 import org.junit.jupiter.api.BeforeEach;

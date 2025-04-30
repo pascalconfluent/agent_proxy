@@ -1,10 +1,10 @@
 package io.confluent.pas.agent.proxy.frameworks.java;
 
 import io.confluent.pas.agent.common.utils.JsonUtils;
-import io.confluent.pas.agent.proxy.frameworks.java.models.Key;
-import io.confluent.pas.agent.proxy.frameworks.java.models.Request;
-import io.confluent.pas.agent.proxy.frameworks.java.models.Response;
-import io.confluent.pas.agent.proxy.frameworks.java.models.ResponseStatus;
+import io.confluent.pas.agent.common.services.models.Key;
+import io.confluent.pas.agent.common.services.models.Request;
+import io.confluent.pas.agent.common.services.models.Response;
+import io.confluent.pas.agent.common.services.models.ResponseStatus;
 import io.confluent.pas.agent.proxy.frameworks.java.subscription.SubscriptionRequest;
 import io.confluent.pas.agent.proxy.frameworks.java.subscription.SubscriptionResponse;
 import org.apache.kafka.streams.processor.api.Processor;

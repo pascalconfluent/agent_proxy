@@ -1,4 +1,4 @@
-package io.confluent.pas.agent.proxy.frameworks.java.models;
+package io.confluent.pas.agent.common.services.models;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

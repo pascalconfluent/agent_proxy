@@ -17,6 +17,7 @@
     <modules>
         <module>agent-proxy-framework</module>
         <module>agent-proxy-framework-starter</module>
+        <module>flink-agent-proxy-framework</module>
     </modules>
 
 </project>

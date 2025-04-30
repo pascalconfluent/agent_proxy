@@ -3,7 +3,7 @@ package io.confluent.pas.agent.proxy.registration.kafka;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.confluent.pas.agent.common.utils.Lazy;
-import io.confluent.pas.agent.proxy.frameworks.java.models.Key;
+import io.confluent.pas.agent.common.services.models.Key;
 import org.apache.kafka.clients.producer.Callback;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;

@@ -1,4 +1,4 @@
-package io.confluent.pas.agent.proxy.frameworks.java.models;
+package io.confluent.pas.agent.common.services.models;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
@@ -18,5 +18,5 @@ public enum ResponseStatus {
     public static ResponseStatus fromString(String value) {
         return value != null ? valueOf(value.toUpperCase()) : null;
     }
-    
+
 }

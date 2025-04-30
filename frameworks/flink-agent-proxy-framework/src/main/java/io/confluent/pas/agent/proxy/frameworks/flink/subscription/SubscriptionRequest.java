@@ -1,4 +1,4 @@
-package io.confluent.pas.agent.proxy.frameworks.java.subscription;
+package io.confluent.pas.agent.proxy.frameworks.flink.subscription;
 
 import io.confluent.pas.agent.common.services.models.Key;
 import lombok.AllArgsConstructor;

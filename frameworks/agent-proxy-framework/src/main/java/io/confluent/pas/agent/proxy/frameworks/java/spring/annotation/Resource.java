@@ -1,7 +1,6 @@
 package io.confluent.pas.agent.proxy.frameworks.java.spring.annotation;
 
 import io.confluent.pas.agent.common.services.schemas.ResourceResponse;
-import io.confluent.pas.agent.proxy.frameworks.java.models.Key;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

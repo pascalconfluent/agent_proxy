@@ -2,7 +2,7 @@ package io.confluent.pas.agent.proxy.registration.kafka;
 
 import io.confluent.pas.agent.common.services.KafkaConfiguration;
 import io.confluent.pas.agent.common.services.KafkaPropertiesFactory;
-import io.confluent.pas.agent.proxy.frameworks.java.models.Key;
+import io.confluent.pas.agent.common.services.models.Key;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -48,9 +48,9 @@ public class Consumer<K, V> implements Closeable {
      * @param timeoutChecker     The timeout checker to use
      */
     public Consumer(KafkaConfiguration kafkaConfiguration,
-            Class<V> requestClass,
-            ConsumerHandler<K, V> consumerHandler,
-            TimeoutChecker timeoutChecker) {
+                    Class<V> requestClass,
+                    ConsumerHandler<K, V> consumerHandler,
+                    TimeoutChecker timeoutChecker) {
         this(consumerHandler,
                 new KafkaConsumer<>(KafkaPropertiesFactory.getConsumerProperties(
                         kafkaConfiguration,
@@ -68,8 +68,8 @@ public class Consumer<K, V> implements Closeable {
      * @param timeoutChecker  The timeout checker to use
      */
     public Consumer(ConsumerHandler<K, V> consumerHandler,
-            KafkaConsumer<K, V> kafkaConsumer,
-            TimeoutChecker timeoutChecker) {
+                    KafkaConsumer<K, V> kafkaConsumer,
+                    TimeoutChecker timeoutChecker) {
         this.kafkaConsumer = kafkaConsumer;
         this.consumerHandler = consumerHandler;
         this.timeoutChecker = timeoutChecker;
