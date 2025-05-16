@@ -44,7 +44,7 @@ class RequestResponseHandlerTest {
         when(kafkaConfiguration.topicConfiguration()).thenReturn(new KafkaConfiguration.DefaultTopicConfiguration());
         when(kafkaConfiguration.saslMechanism()).thenReturn(KafkaConfiguration.DEFAULT_SASL_MECHANISM);
 
-        requestResponseHandler = new RequestResponseHandler(producerService, consumerService, observationRegistry);
+        requestResponseHandler = new RequestResponseHandler(producerService, consumerService);
     }
 
     @Test

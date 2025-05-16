@@ -1,10 +1,7 @@
 package io.confluent.pas.agent.proxy.registration;
 
 import io.confluent.kafka.schemaregistry.client.SchemaRegistryClient;
-import io.confluent.pas.agent.common.services.KafkaConfiguration;
-import io.confluent.pas.agent.common.services.KafkaPropertiesFactory;
-import io.confluent.pas.agent.common.services.RegistrationService;
-import io.confluent.pas.agent.common.services.RegistrationServiceHandler;
+import io.confluent.pas.agent.common.services.*;
 import io.confluent.pas.agent.common.services.schemas.Registration;
 import io.confluent.pas.agent.common.services.schemas.RegistrationKey;
 import io.confluent.pas.agent.proxy.registration.events.DeletedRegistrationEvent;
@@ -29,7 +26,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * <p>
  * It coordinates the following processes:
  * - Listening for new registrations on the registration topic
- * - Processing incoming registrations and unregistrations
+ * - Processing incoming registrations and un-registrations
  * - Creating and managing handlers for each registered tool
  * - Maintaining the lifecycle of registrations
  * - Broadcasting registration events to other components
@@ -50,9 +47,6 @@ public class RegistrationCoordinator implements DisposableBean {
     @Getter
     private final A2AAsyncServer a2AAsyncServer;
 
-    /**
-     * REST server for handling HTTP/REST communications
-     */
     @Getter
     private final AgentAsyncServer restServer;
 
@@ -105,7 +99,7 @@ public class RegistrationCoordinator implements DisposableBean {
         // Create a registration handler that will forward registration events to our
         // onRegistration method
         // This avoids the circular reference issue during construction
-        RegistrationServiceHandler.Handler<RegistrationKey, Registration> registrationHandler = registrations -> {
+        CacheHandler.Handler<RegistrationKey, Registration> registrationHandler = registrations -> {
             if (registrations != null) {
                 onRegistration(registrations);
             }

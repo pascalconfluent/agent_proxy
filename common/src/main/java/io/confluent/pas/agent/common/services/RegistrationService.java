@@ -1,17 +1,8 @@
 package io.confluent.pas.agent.common.services;
 
-import io.confluent.kafka.schemaregistry.client.SchemaRegistryClient;
-import io.confluent.kafka.serializers.json.KafkaJsonSchemaDeserializer;
-import io.confluent.kafka.serializers.json.KafkaJsonSchemaDeserializerConfig;
-import io.confluent.kafka.serializers.json.KafkaJsonSchemaSerializer;
-import io.confluent.kafka.serializers.json.KafkaJsonSchemaSerializerConfig;
 import io.confluent.pas.agent.common.services.schemas.Registration;
 import io.confluent.pas.agent.common.services.schemas.RegistrationKey;
-import io.confluent.pas.agent.common.utils.SchemaUtils;
-import io.kcache.KafkaCache;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.kafka.common.serialization.Serde;
-import org.apache.kafka.common.serialization.Serdes;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -42,12 +33,15 @@ public class RegistrationService<K extends RegistrationKey, R extends Registrati
                                Class<K> registrationKeyClass,
                                Class<R> registrationClass,
                                boolean readOnly,
-                               RegistrationServiceHandler.Handler<K, R> handler) {
-        this(initialize(kafkaConfiguration,
+                               CacheHandler.Handler<K, R> handler) {
+        registrationCache = new Cache<>(
+                kafkaConfiguration,
+                "registration-cache",
                 registrationKeyClass,
                 registrationClass,
+                handler,
                 readOnly,
-                handler));
+                kafkaConfiguration.registrationTopicName());
     }
 
     /**
@@ -70,24 +64,12 @@ public class RegistrationService<K extends RegistrationKey, R extends Registrati
     public RegistrationService(KafkaConfiguration kafkaConfiguration,
                                Class<K> registrationKeyClass,
                                Class<R> registrationClass,
-                               RegistrationServiceHandler.Handler<K, R> handler) {
-        this(kafkaConfiguration, registrationKeyClass, registrationClass, false, handler);
-    }
-
-
-    /**
-     * Constructor for RegistrationService without a handler.
-     *
-     * @param kafkaConfiguration   the Kafka configuration
-     * @param registrationKeyClass the class type of the registration key
-     * @param registrationClass    the class type of the registration
-     * @param readOnly             whether the service is read-only
-     */
-    public RegistrationService(KafkaConfiguration kafkaConfiguration,
-                               Class<K> registrationKeyClass,
-                               Class<R> registrationClass,
-                               boolean readOnly) {
-        this(kafkaConfiguration, registrationKeyClass, registrationClass, readOnly, null);
+                               CacheHandler.Handler<K, R> handler) {
+        this(kafkaConfiguration,
+                registrationKeyClass,
+                registrationClass,
+                false,
+                handler);
     }
 
     /**
@@ -163,74 +145,5 @@ public class RegistrationService<K extends RegistrationKey, R extends Registrati
     public void unregister(K key) {
         // Remove the registration associated with the given key from the Kafka cache.
         registrationCache.remove(key);
-    }
-
-
-    /**
-     * Initialize the registration service.
-     * Configures the Kafka serializers and deserializers, and initializes the Kafka cache.
-     *
-     * @param kafkaConfiguration   the Kafka configuration
-     * @param registrationKeyClass the class type of the registration key
-     * @param registrationClass    the class type of the registration
-     * @param readOnly             whether the service is read-only
-     * @param handler              the handler for processing registration updates
-     *                             (optional, can be null)
-     * @return the initialized Kafka cache
-     */
-    private static <K extends RegistrationKey, R extends Registration> KafkaCache<K, R> initialize(
-            KafkaConfiguration kafkaConfiguration,
-            Class<K> registrationKeyClass,
-            Class<R> registrationClass,
-            boolean readOnly,
-            RegistrationServiceHandler.Handler<K, R> handler) {
-        // Retrieve the Schema Registry configuration settings from KafkaPropertiesFactory.
-        final Map<String, Object> srConfig = KafkaPropertiesFactory.getSchemaRegistryConfig(kafkaConfiguration);
-        srConfig.put(KafkaJsonSchemaDeserializerConfig.JSON_KEY_TYPE, registrationKeyClass);
-        srConfig.put(KafkaJsonSchemaDeserializerConfig.JSON_VALUE_TYPE, registrationClass);
-        srConfig.put(KafkaJsonSchemaSerializerConfig.AUTO_REGISTER_SCHEMAS, true);
-
-        // Create and configure the Serde for the registration key using Kafka JSON schema serializer and deserializer.
-        final Serde<K> keySerdes = new Serdes.WrapperSerde<>(
-                new KafkaJsonSchemaSerializer<>(),
-                new KafkaJsonSchemaDeserializer<>()
-        );
-        keySerdes.configure(srConfig, true);
-
-        // Create and configure the Serde for the registration value using Kafka JSON schema serializer and deserializer.
-        final Serde<R> valueSerdes = new Serdes.WrapperSerde<>(
-                new KafkaJsonSchemaSerializer<>(),
-                new KafkaJsonSchemaDeserializer<>()
-        );
-        valueSerdes.configure(srConfig, false);
-
-        final RegistrationServiceHandler<K, R> serviceHandler = handler != null
-                ? new RegistrationServiceHandler<>(handler)
-                : null;
-
-        final KafkaCache<K, R> cache = new KafkaCache<>(
-                KafkaPropertiesFactory.getCacheConfig(kafkaConfiguration, readOnly),
-                keySerdes,
-                valueSerdes,
-                serviceHandler,
-                null
-        );
-
-        cache.init();
-
-        if (serviceHandler != null && serviceHandler.isEmpty()) {
-            final String registrationTopic = kafkaConfiguration.registrationTopicName();
-
-            // If a service handler is provided and is empty, register the necessary schemas in the Schema Registry.
-            try (SchemaRegistryClient schemaRegistryClient = KafkaPropertiesFactory.getSchemRegistryClient(kafkaConfiguration)) {
-                SchemaUtils.registerSchemaIfMissing(registrationTopic, registrationKeyClass, true, schemaRegistryClient);
-                SchemaUtils.registerSchemaIfMissing(registrationTopic, registrationClass, false, schemaRegistryClient);
-            } catch (Throwable e) {
-                log.error("Error registering schemas", e);
-            }
-
-        }
-
-        return cache;
     }
 }

@@ -1,7 +1,6 @@
 package io.confluent.pas.agent.proxy.frameworks.java.subscription;
 
 import io.confluent.pas.agent.proxy.frameworks.java.models.Key;
-import io.confluent.pas.agent.proxy.frameworks.java.models.Response;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;

@@ -1,6 +1,6 @@
 spring:
   application:
-    name: "Confluent MCP Proxy"
+    name: "Confluent Agent Proxy"
   mvc:
     async:
       request-timeout: 60000
@@ -8,7 +8,7 @@ spring:
     web-application-type: reactive
 mcp:
   server:
-    name: "Confluent MCP Proxy"
+    name: "Confluent Agent Proxy"
     version: 1.0.0
     mode: "sse"
 authentication:

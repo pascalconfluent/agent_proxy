@@ -70,8 +70,7 @@ public class RequestResponseChannel implements AutoCloseable {
      *
      * @param correlationId          unique ID to correlate requests with responses
      * @param registration           service registration details
-     * @param requestResponseHandler handler for sending requests and receiving
-     *                               responses
+     * @param requestResponseHandler handler for sending requests and receiving responses
      * @param processor              callback for processing received responses
      */
     public RequestResponseChannel(String correlationId,
@@ -96,8 +95,7 @@ public class RequestResponseChannel implements AutoCloseable {
     }
 
     /**
-     * Registers success and error handlers for responses with the request-response
-     * handler.
+     * Registers success and error handlers for responses with the request-response handler.
      * This sets up the callback mechanism for processing responses.
      */
     private void registerResponseHandler() {
@@ -136,8 +134,7 @@ public class RequestResponseChannel implements AutoCloseable {
     }
 
     /**
-     * Creates a handler for error responses or exceptions that occur during
-     * processing.
+     * Creates a handler for error responses or exceptions that occur during processing.
      * This handler formats errors and forwards them to the processor.
      *
      * @param processor callback to forward the error information to

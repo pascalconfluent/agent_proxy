@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-//@RestController
+@RestController
 @Tag(name = "A2A", description = "Google A2A compliant API")
 public class A2AController {
     private final static String AGENT_PATH = "/a2a/";

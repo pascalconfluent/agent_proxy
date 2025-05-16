@@ -146,11 +146,28 @@ public class KafkaPropertiesFactory {
      * @param readOnly     Whether the cache should be read-only
      * @return KafkaCacheConfig configured for the cache
      */
-    public static KafkaCacheConfig getCacheConfig(KafkaConfiguration configration, boolean readOnly) {
+    public static KafkaCacheConfig getRegistrationCacheConfig(KafkaConfiguration configration, boolean readOnly) {
+        return getCacheConfig(configration, readOnly, configration.registrationTopicName(), "registration");
+    }
+
+    /**
+     * Creates configuration for a Kafka cache.
+     * Sets up topic, client ID, and group ID with appropriate suffixes.
+     *
+     * @param configration   The Kafka configuration containing connection and auth details
+     * @param readOnly       Whether the cache should be read-only
+     * @param topicName      The name of the topic
+     * @param clientIdSuffix The suffix to add to the client ID to create a unique ID for the cache
+     * @return KafkaCacheConfig configured for the cache
+     */
+    public static KafkaCacheConfig getCacheConfig(KafkaConfiguration configration,
+                                                  boolean readOnly,
+                                                  String topicName,
+                                                  String clientIdSuffix) {
         Properties properties = getDefaultProperties(configration, "kafkacache.");
-        properties.put(KafkaCacheConfig.KAFKACACHE_TOPIC_CONFIG, configration.registrationTopicName());
-        properties.put(KafkaCacheConfig.KAFKACACHE_CLIENT_ID_CONFIG, configration.applicationId() + "-registration" + "-" + configration.clientId());
-        properties.put(KafkaCacheConfig.KAFKACACHE_GROUP_ID_CONFIG, configration.applicationId() + "-registration" + "-group");
+        properties.put(KafkaCacheConfig.KAFKACACHE_TOPIC_CONFIG, topicName);
+        properties.put(KafkaCacheConfig.KAFKACACHE_CLIENT_ID_CONFIG, configration.applicationId() + "-" + clientIdSuffix + "-" + configration.clientId());
+        properties.put(KafkaCacheConfig.KAFKACACHE_GROUP_ID_CONFIG, configration.applicationId() + "-" + clientIdSuffix + "-group");
         properties.put(KafkaCacheConfig.KAFKACACHE_TOPIC_READ_ONLY_CONFIG, readOnly);
         return new KafkaCacheConfig(properties);
     }

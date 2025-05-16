@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import io.confluent.pas.agent.common.services.KafkaConfiguration;
 import io.confluent.pas.agent.common.services.schemas.Registration;
 import io.confluent.pas.agent.proxy.frameworks.java.models.Key;
+import io.confluent.pas.agent.proxy.registration.kafka.impl.ConsumerImpl;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -17,8 +18,7 @@ import io.confluent.pas.agent.proxy.registration.kafka.exceptions.TimeoutExcepti
 
 /**
  * Service that handles responses from Kafka topics by routing messages to
- * appropriate handlers
- * based on correlation IDs. This service:
+ * appropriate handlers based on correlation IDs. This service:
  * <ul>
  * <li>Subscribes to response topics for registered services</li>
  * <li>Routes messages to the correct handler using correlation IDs</li>
@@ -82,8 +82,7 @@ public class ConsumerService implements Closeable {
     }
 
     /**
-     * Map of topic names to their registration items, which include handlers
-     * indexed by correlation ID.
+     * Map of topic names to their registration items, which include handlers indexed by correlation ID.
      */
     @Getter
     private final Map<String, RegistrationItem> responseHandlers = new ConcurrentHashMap<>();
@@ -103,7 +102,7 @@ public class ConsumerService implements Closeable {
      *                           timing out
      */
     public ConsumerService(KafkaConfiguration kafkaConfiguration, long responseTimeout) {
-        this.consumer = new Consumer<>(
+        this.consumer = new ConsumerImpl<>(
                 kafkaConfiguration,
                 JsonNode.class,
                 this::handleResponse,

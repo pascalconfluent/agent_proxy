@@ -212,10 +212,10 @@ llm gemini
 Below is an example of how the shell interacts with the MCP proxy and LLM:
 
 ```
-Connected to server: Confluent MCP Proxy (1.0.0)
-shell:>mcp list tools "Confluent MCP Proxy"
+Connected to server: Confluent Agent Proxy (1.0.0)
+shell:>mcp list tools "Confluent Agent Proxy"
 --------------------
-Tools for server: Confluent MCP Proxy
+Tools for server: Confluent Agent Proxy
 ....................
 Name: findLastName
 Description: Find the last name of a given user

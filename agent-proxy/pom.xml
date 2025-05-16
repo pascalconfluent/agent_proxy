@@ -40,10 +40,10 @@
         <java.version>21</java.version>
         <confluent.version>7.9.1-22</confluent.version>
         <kafka.version>7.9.0-ce</kafka.version>
-        <caffeine.version>3.2.0</caffeine.version>
         <reactor-test.version>3.7.5</reactor-test.version>
         <spring-openapi.version>2.8.6</spring-openapi.version>
         <kcache.version>5.2.1</kcache.version>
+        <caffeine.version>3.2.0</caffeine.version>
         <mcp.version>0.9.0</mcp.version>
         <apache.common.lang3.version>3.17.0</apache.common.lang3.version>
     </properties>
@@ -106,6 +106,12 @@
         <dependency>
             <groupId>io.kcache</groupId>
             <artifactId>kcache</artifactId>
+            <version>${kcache.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.kcache</groupId>
+            <artifactId>kcache-caffeine</artifactId>
             <version>${kcache.version}</version>
         </dependency>
 

@@ -6,7 +6,6 @@ import io.confluent.pas.agent.common.services.schemas.Registration;
 import io.confluent.pas.agent.proxy.frameworks.java.models.Key;
 import io.confluent.pas.agent.proxy.registration.kafka.ProducerService;
 import io.confluent.pas.agent.proxy.registration.kafka.ConsumerService;
-import io.micrometer.observation.ObservationRegistry;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,23 +24,18 @@ public class RequestResponseHandler implements DisposableBean {
 
     private final ProducerService producerService;
     private final ConsumerService consumerService;
-    private final ObservationRegistry observationRegistry;
 
     @Autowired
     public RequestResponseHandler(KafkaConfiguration kafkaConfiguration,
-                                  ObservationRegistry observationRegistry,
                                   @Value("${kafka.response.timeout:10000}") long responseTimeout) {
         this(new ProducerService(kafkaConfiguration),
-                new ConsumerService(kafkaConfiguration, responseTimeout),
-                observationRegistry);
+                new ConsumerService(kafkaConfiguration, responseTimeout));
     }
 
     public RequestResponseHandler(ProducerService producerService,
-                                  ConsumerService consumerService,
-                                  ObservationRegistry observationRegistry) {
+                                  ConsumerService consumerService) {
         this.producerService = producerService;
         this.consumerService = consumerService;
-        this.observationRegistry = observationRegistry;
     }
 
     public void addRegistrations(Collection<Registration> registrations) {

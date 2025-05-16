@@ -114,9 +114,9 @@ llm gemini
 ### Example Interaction in MCP Shell
 
 ```sh
-shell:> mcp list tools "Confluent MCP Proxy"
+shell:> mcp list tools "Confluent Agent Proxy"
 --------------------
-Tools for server: Confluent MCP Proxy
+Tools for server: Confluent Agent Proxy
 ....................
 Name: JavaSentimentAgent
 Description: This agent analyzes sentiment in human queries.

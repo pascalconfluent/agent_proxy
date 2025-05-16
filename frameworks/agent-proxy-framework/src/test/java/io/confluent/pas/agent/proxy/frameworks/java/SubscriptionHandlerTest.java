@@ -3,12 +3,14 @@ package io.confluent.pas.agent.proxy.frameworks.java;
 import io.confluent.kafka.schemaregistry.json.JsonSchema;
 import io.confluent.pas.agent.common.services.KafkaConfiguration;
 import io.confluent.pas.agent.common.services.RegistrationService;
+import io.confluent.pas.agent.common.services.Streaming;
 import io.confluent.pas.agent.common.services.schemas.Registration;
 import io.confluent.pas.agent.common.services.schemas.RegistrationKey;
 import io.confluent.pas.agent.proxy.frameworks.java.kafka.TopicManagement;
 import io.confluent.pas.agent.proxy.frameworks.java.models.Key;
+import io.confluent.pas.agent.proxy.frameworks.java.models.Request;
+import io.confluent.pas.agent.proxy.frameworks.java.models.Response;
 import org.apache.commons.lang3.RandomStringUtils;
-import org.apache.kafka.streams.KafkaStreams;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -18,10 +20,10 @@ import static org.mockito.Mockito.*;
 
 public class SubscriptionHandlerTest {
 
-    private record Request(int a, int b) {
+    private record HandlingRequest(int a, int b) {
     }
 
-    private record Response(int result) {
+    private record HandlingResponse(int result) {
     }
 
 
@@ -35,9 +37,9 @@ public class SubscriptionHandlerTest {
     private TopicManagement topicManagement;
 
     @Mock
-    private KafkaStreams kStreams;
+    private Streaming<Key, Request, Response> kStreams;
 
-    private SubscriptionHandler<Request, Response> subscriptionHandler;
+    private SubscriptionHandler<HandlingRequest, HandlingResponse> subscriptionHandler;
 
     @BeforeEach
     public void setUp() {
@@ -55,11 +57,11 @@ public class SubscriptionHandlerTest {
 
         subscriptionHandler = new SubscriptionHandler<>(
                 kafkaConfiguration,
-                Request.class,
-                Response.class,
+                HandlingRequest.class,
+                HandlingResponse.class,
                 registrationService,
                 () -> topicManagement,
-                (topology, properties) -> kStreams);
+                kStreams);
     }
 
     @Test
@@ -73,7 +75,7 @@ public class SubscriptionHandlerTest {
                         "responseTopic"
                 ),
                 (request) -> {
-                    request.respond(new Response(request.getRequest().a() + request.getRequest().b()))
+                    request.respond(new HandlingResponse(request.getRequest().a() + request.getRequest().b()))
                             .block();
                 }
         );
@@ -100,7 +102,7 @@ public class SubscriptionHandlerTest {
                 new JsonSchema(reqSchema),
                 new JsonSchema(resSchema),
                 (request) -> {
-                    request.respond(new Response(request.getRequest().a() + request.getRequest().b()))
+                    request.respond(new HandlingResponse(request.getRequest().a() + request.getRequest().b()))
                             .block();
                 }
         );

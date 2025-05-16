@@ -1,6 +1,6 @@
 spring:
   application:
-    name: "Confluent MCP Proxy Client"
+    name: "Confluent Agent Proxy Client"
   shell:
     interactive:
       enabled: true

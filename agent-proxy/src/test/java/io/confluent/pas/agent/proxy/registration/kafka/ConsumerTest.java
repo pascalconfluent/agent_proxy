@@ -1,6 +1,7 @@
 package io.confluent.pas.agent.proxy.registration.kafka;
 
 import io.confluent.pas.agent.common.services.KafkaConfiguration;
+import io.confluent.pas.agent.proxy.registration.kafka.impl.ConsumerImpl;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
@@ -28,7 +29,7 @@ class ConsumerTest {
     @Mock
     private KafkaConfiguration kafkaConfiguration;
 
-    private Consumer<String, String> consumer;
+    private ConsumerImpl<String, String> consumer;
 
     @BeforeEach
     void setUp() {
@@ -44,7 +45,7 @@ class ConsumerTest {
         when(kafkaConfiguration.saslMechanism()).thenReturn(KafkaConfiguration.DEFAULT_SASL_MECHANISM);
 
 
-        consumer = new Consumer<>(consumerHandler, kafkaConsumer, mock(Consumer.TimeoutChecker.class));
+        consumer = new ConsumerImpl<>(consumerHandler, kafkaConsumer, mock(ConsumerImpl.TimeoutChecker.class));
     }
 
     @Test
